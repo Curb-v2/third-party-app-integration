@@ -4,15 +4,31 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
     <title></title>
+    <link rel="stylesheet" type="text/css" href="styles.css" />
   </head>
   <body>
-    <header>
-      <div class="userinfo"></div>
-      <a href="#" class="logout">Logout</a>
-    </header>
-    <main>
-      <h3>Loading...</h3>
-    </main>
+    <div id="login-container">
+
+    </div>
+    <div class="app hidden">
+      <header>
+        <div class="userinfo"></div>
+        <a href="#" class="logout">Logout</a>
+      </header>
+      <main>
+        <section class="locations">
+          <h3>Locations</h3>
+          <ul></ul>
+        </section>
+        <section class="live-data">
+          <h3>Live data</h3>
+          <ul></ul>
+        </section>
+        <section class="historical">
+          <h3>Historical</h3>
+        </section>
+      </main>
+    </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
     <script src="http://cdn.auth0.com/js/lock/10.14.0/lock.min.js"></script>
