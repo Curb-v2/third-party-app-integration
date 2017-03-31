@@ -3,8 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
-    <title></title>
+    <title>Curb™ example app</title>
     <link rel="stylesheet" type="text/css" href="styles.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.css" />
   </head>
   <body>
     <div id="login-container">
@@ -17,19 +18,84 @@
       </header>
       <main>
         <section class="locations">
-          <h3>Locations</h3>
+          <h2>Locations</h2>
           <ul></ul>
+          <h4>Current Location</h4>
+          <div class="current-location">
+          </div>
         </section>
         <section class="live-data">
-          <h3>Live data</h3>
-          <ul></ul>
+          <h2>Live circuit data</h2>
+          <div class="circuits">
+            <div class="consumption">
+              <h4>Consumption</h4>
+              <ul></ul>
+            </div>
+            <div class="production">
+              <h4>Production</h4>
+              <ul></ul>
+            </div>
+          </div>
         </section>
         <section class="historical">
-          <h3>Historical</h3>
+          <h2>Historical</h2>
+          <div class="time-series">
+            <h3>Historical time series data</h3>
+            <form>
+              <label for="historical-range">Range</label>
+              <select name="historical-range">
+                <option value="3h" selected>3 hour</option>
+                <option value="1d">1 day</option>
+                <option value="1w">1 week</option>
+                <option value="1mo">1 month</option>
+                <option value="6mo">6 months</option>
+              <select>
+              <label for="historical-resolution">Resolution</label>
+              <select name="historical-resolution">
+                <option value="m">minute</option>
+                <option value="5m" selected>5 minute</option>
+                <option value="h">hour</option>
+                <option value="d">day</option>
+                <option value="w">week</option>
+              <select>
+              <p>
+                <code>/api/public/historical/<span class="url-location-id">{locationId}</span>/<span class="url-historical-range">{range}</span>/<span class="url-historical-resolution">{resolution}</span></code>
+                <button>Fetch data</button>
+              </p>
+              <pre class="historical-results"></pre>
+            </form>
+          </div>
+          <div class="aggregate">
+            <h3>Historical aggregate data</h3>
+            <form>
+              <label for="historical-range">Range</label>
+              <select name="historical-range">
+                <option value="3h" selected>3 hour</option>
+                <option value="1d">1 day</option>
+                <option value="1w">1 week</option>
+                <option value="1mo">1 month</option>
+                <option value="6mo">6 months</option>
+              <select>
+              <label for="historical-resolution">Resolution</label>
+              <select name="historical-resolution">
+                <option value="m">minute</option>
+                <option value="5m" selected>5 minute</option>
+                <option value="h">hour</option>
+                <option value="d">day</option>
+                <option value="w">week</option>
+              <select>
+              <p>
+                <code>/api/public/aggregate/<span class="url-location-id">{locationId}</span>/<span class="url-historical-range">{range}</span>/<span class="url-historical-resolution">{resolution}</span></code>
+                <button>Fetch data</button>
+              </p>
+              <pre class="historical-results"></pre>
+            </form>
+          </div>
         </section>
       </main>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
     <script src="http://cdn.auth0.com/js/lock/10.14.0/lock.min.js"></script>
     <script type="application/javascript" src="app.js"></script>

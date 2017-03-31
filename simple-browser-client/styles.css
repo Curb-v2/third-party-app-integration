@@ -7,6 +7,9 @@ body {
 a, a:visited {
   color: blue;
 }
+* {
+  box-sizing: border-box;
+}
 
 ul {
   margin: 0;
@@ -27,6 +30,18 @@ header {
 
 header .logout {
   align-self: center;
+}
+
+.app .production {
+  display: none;
+}
+
+.app.production .production {
+  display: block;
+}
+
+main {
+  padding: 0 2%;
 }
 
 .userinfo .avatar {
@@ -55,25 +70,65 @@ header .logout {
   cursor: auto;
 }
 
-.live-data ul {
+.locations .current-location {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+}
+
+.locations .current-location .info {
+  padding: 0.5em;
+  align-self: center;
+}
+
+.locations .current-location span {
+  display: block;
+}
+
+.locations .current-location .map {
+  border: 2px solid #ccc;
+}
+
+.live-data .circuits {
+  display: flex;
+  justify-content: space-between;
+}
+
+.live-data .circuits > div {
+  width: 48%;
 }
 
 .live-data li {
   padding: 0.5em;
+  list-style: none;
   display: flex;
-  width: 45%;
+  width: 100%;
   justify-content: space-between;
 }
 
-.live-data li:nth-child(4n),
-.live-data li:nth-child(4n-1) {
+.live-data li:nth-child(2n) {
   background: #ccc;
 }
 
 .live-data li .label {
   font-weight: bold;
   margin-right: 0.5em;
+}
+
+button {
+  font-size: 1.2em;
+  background: #ddd;
+}
+
+.historical code {
+  padding-right: 1em;
+}
+
+pre, code {
+  background: #ccc;
+  border: 1px solid #999;
+  padding: 0.5em;
+}
+
+pre {
+  height: 300px;
+  overflow: auto;
 }

@@ -2,7 +2,7 @@
   var ID_TOKEN_KEY = 'idToken';
       ACCESS_TOKEN_KEY = 'accessToken';
       authKeys = [ACCESS_TOKEN_KEY, ID_TOKEN_KEY];
-      APP_HOST = 'http://localhost:3000';
+      APP_HOST = 'https://app.energycurb.com';
       API_ROOT = APP_HOST + '/api/public';
       AUTH_CLIENT_ID = 'hk5N2Ep8uxJcaxfeebd6nxcHQd5cFLHb',
       AUTH_DOMAIN = 'energycurb.auth0.com'
@@ -39,6 +39,7 @@
         function(user, locations){
           self.user = user[0];
           self.allLocations = locations[0];
+          self.renderUserInfo();
           self.selectLocation(self.allLocations[0].id);
         }
       );
@@ -46,6 +47,7 @@
 
     openLiveDataChannel: function(){
       var self = this;
+      $('.live-data ul').empty();
       if(io){
         if(this.socket){
           this.socket.destroy();
@@ -73,6 +75,11 @@
         e.preventDefault();
         self.logout();
       });
+
+      $(document).on('click', '.location-selector', function(e, el){
+        var locationId = $(e.currentTarget).attr('data-id');
+        self.selectLocation(locationId);
+      });
     },
 
     selectLocation: function(locationId){
@@ -83,33 +90,42 @@
     },
 
     renderForLocation(){
+      var currentLocation = this.getCurrentLocation();
+      $('.app').toggleClass('production', currentLocation && currentLocation.hasProduction);
       this.openLiveDataChannel();
-      this.renderUserInfo();
       this.renderLocations();
-      // render more stuff
+      this.renderHistorical();
+      this.renderAggregate();
     },
 
     renderLiveData(data){
       var self = this,
-          circuitsList = $('.live-data ul');
+          consumersList = $('.live-data .consumption ul'),
+          producersList = $('.live-data .production ul'),
+          consumingCircuits = data.circuits.filter(function(circuit){ return circuit.label && !circuit.main && !circuit.production }),
+          producingCircuits = data.circuits.filter(function(circuit){ return circuit.label && !circuit.main && circuit.production });
 
-      circuitsList.empty();
+      consumersList.empty();
+      producersList.empty();
 
-      data.circuits
-        .filter(function(circuit){
-          return circuit.label && !circuit.main
-        })
-        .forEach(function(circuit){
-          circuitsList.append(
-            $('<li>')
-              .toggleClass('production', circuit.production)
-              .append(
-                $('<span class="label">').text(circuit.label)
-              )
-              .append(
-                $('<span class="wattage">').text(circuit.w + 'W')
-              )
-          );
+      var renderCircuit = function(circuit, container){
+        container.append(
+          $('<li>')
+            .append(
+              $('<span class="label">').text(circuit.label)
+            )
+            .append(
+              $('<span class="wattage">').text(circuit.w + 'W')
+            )
+        );
+      };
+
+      consumingCircuits.forEach(function(circuit){
+        renderCircuit(circuit, consumersList);
+      });
+
+      producingCircuits.forEach(function(circuit){
+        renderCircuit(circuit, producersList);
       });
     },
 
@@ -138,16 +154,128 @@
         );
     },
 
+    renderHistorical: function(){
+      var self = this,
+          container = $('.time-series'),
+          currentLocation = this.getCurrentLocation(),
+          range = '3h',
+          resolution = '5m',
+          rangeSelector = container.find('select[name="historical-range"]'),
+          resolutionSelector = container.find('select[name="historical-resolution"]'),
+          button = container.find('button'),
+          resultsContainer = container.find('.historical-results');
+
+      var update = function(){
+        range = rangeSelector.val();
+        resolution = resolutionSelector.val();
+        container.find('.url-historical-range').text(range);
+        container.find('.url-historical-resolution').text(resolution);
+      };
+      var fetchData = function(){
+        resultsContainer.html('Loading...');
+        self.makeHistoricalCall(range, resolution)
+          .done(function(data){
+            resultsContainer.JSONView(data, {collapsed: true});
+          });
+      }
+
+      container.find('.url-location-id').text(currentLocation.id);
+      rangeSelector.add(resolutionSelector).on('change', update);
+      button.off('click').on('click', function(e){
+        e.preventDefault();
+        fetchData();
+      });
+      update();
+      fetchData();
+    },
+
+    renderAggregate: function(){
+      var self = this,
+          container = $('.aggregate'),
+          currentLocation = this.getCurrentLocation(),
+          range = '3h',
+          resolution = '5m',
+          rangeSelector = container.find('select[name="historical-range"]'),
+          resolutionSelector = container.find('select[name="historical-resolution"]'),
+          button = container.find('button'),
+          resultsContainer = container.find('.historical-results');
+
+      var update = function(){
+        range = rangeSelector.val();
+        resolution = resolutionSelector.val();
+        container.find('.url-historical-range').text(range);
+        container.find('.url-historical-resolution').text(resolution);
+      };
+      var fetchData = function(){
+        resultsContainer.html('Loading...');
+        self.makeAggregateCall(range, resolution)
+          .done(function(data){
+            console.log(data);
+            resultsContainer.JSONView(data, {collapsed: true});
+          });
+      }
+
+      container.find('.url-location-id').text(currentLocation.id);
+      rangeSelector.add(resolutionSelector).on('change', update);
+      button.off('click').on('click', function(e){
+        e.preventDefault();
+        fetchData();
+      });
+      update();
+      fetchData();
+    },
+
+    makeHistoricalCall: function(range, resolution){
+      return this.makeAPICall('/historical/' + this.locationId + '/' + range + '/' + resolution);
+    },
+
+    makeAggregateCall: function(range, resolution){
+      return this.makeAPICall('/aggregate/' + this.locationId + '/' + range + '/' + resolution);
+    },
+
     renderLocations: function(){
       var self = this,
           locationList = $('.locations ul');
+          currentLocation = this.getCurrentLocation();
+          currentLocationProfile = $('.locations .current-location');
 
       locationList.empty();
       this.allLocations.forEach(function(location){
         locationList.append(
           $('<li class="location-selector">').attr('data-id', location.id).toggleClass('active', self.locationId === location.id).text(location.name)
         );
-      })
+      });
+
+      currentLocationProfile.empty()
+        .append(
+          $('<div class="info">')
+            .append(
+              $('<span class="name">').text(currentLocation.name)
+            )
+            .append(
+              $('<span class="address">').text(currentLocation.address + ' ' + currentLocation.postcode)
+            )
+        );
+      if(currentLocation.geocode){
+        currentLocationProfile
+          .prepend(
+            $('<img class="map">').attr(
+              'src',
+              'https://maps.googleapis.com/maps/api/staticmap?center=' + currentLocation.geocode +
+              '&zoom=16&size=100x100' +
+              '&markers=color:blue%7C' + currentLocation.geocode +
+              '&key=AIzaSyB6KPLzuUx-TDTSJoCKZL2hSIF6Vqn564A'
+            )
+          );
+      }
+
+    },
+
+    getCurrentLocation: function(){
+      var self = this;
+      return (this.allLocations || []).find(function(location){
+        return location.id === self.locationId;
+      });
     },
 
     isLoggedIn: function(){
