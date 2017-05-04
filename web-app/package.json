@@ -1,0 +1,12 @@
+{
+  "name": "curb-web-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "An example third-party web application that integrates with Curb's API",
+  "main": "app/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "codyrushing",
+  "license": "ISC"
+}
