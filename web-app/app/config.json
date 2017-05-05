@@ -1,0 +1,7 @@
+{
+  "PORT": 8000,
+  "AUDIENCE": "https://app.energycurb.com",
+  "CALLBACK_URL": "https://app.energycurb.com/curb-code-grant",
+  "STATIC_FILE_ROOT": "./public",
+  "CLIENT_ID": ""
+}

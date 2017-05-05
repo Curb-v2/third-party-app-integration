@@ -1,6 +1,0 @@
-{
-  "PORT": 8080,
-  "AUDIENCE": "https://app.dev.energycurb.com",
-  "CALLBACK_URL": "https://app.dev.energycurb.com/curb-code-grant",
-  "CLIENT_ID": "yoltvk4XevWSDDF3dhCWMD77lHNAJcH0"
-}
