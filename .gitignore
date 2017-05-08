@@ -1,2 +1,4 @@
 node_modules/
 npm-debug.log
+web-app/public/js
+web-app/app/config.json
