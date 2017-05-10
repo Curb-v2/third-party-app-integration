@@ -6,7 +6,9 @@ const session = require('express-session');
 
 
 app.use(
-  cookieParser()
+  cookieParser(
+    config.COOKIE_SIGNING_SECRET
+  )
 );
 
 // sessions

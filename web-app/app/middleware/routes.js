@@ -1,5 +1,6 @@
 const app = require('../app');
 const config = require('../config');
+const apiService = require('../services/api');
 
 // secure all downstream routes
 app.use(
@@ -16,6 +17,17 @@ app.use(
 
 //
 app.get('/', (req, res, next) => {
-  console.log(req.session);
-  res.render('logged-in');
+  Promise.all([
+    apiService.getUser(req.session.accessToken),
+    apiService.getLocations(req.session.accessToken)
+  ])
+    .then(
+      ([user, locations]) => {
+        res.render('logged-in', {
+          user,
+          locations
+        });
+      }
+    )
+    .catch(next);
 });

@@ -35,8 +35,8 @@ app.get(`/${path.basename(config.AUTH_REDIRECT_URI)}`, (req, res, next) => {
   }
   req.session.authCode = req.query.code;
   authService.getTokenForAuthCode(req.session.authCode).then(
-    idToken => {
-      req.session.idToken = idToken;
+    accessToken => {
+      req.session.accessToken = accessToken;
       res.redirect('/');      
     }
   )

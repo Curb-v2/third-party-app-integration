@@ -22,7 +22,7 @@ module.exports = {
             if(err){
               return reject(err);
             }
-            return resolve(body.id_token);
+            return resolve(body.access_token);
           }
         );
       }
