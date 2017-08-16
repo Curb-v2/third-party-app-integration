@@ -1,0 +1,9 @@
+extends layout/page
+
+block main
+  h1 You are logged in as #{user.name}
+  h3 Your locations
+  ul
+    each loc in locations
+      li 
+        a(href='/location/' + loc.id) #{loc.name}

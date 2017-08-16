@@ -1,0 +1,60 @@
+{
+  "parser": "babel-eslint",
+  "extends": ["eslint:recommended"],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "classes": true,
+      "arrowFunctions": true,
+      "destructuring": true,
+      "blockBindings": true,
+      "forOf": true,
+      "jsx": true,
+      "generators": true
+    },
+  },
+  "rules": {
+    "strict": 0,
+    "no-unused-vars": [2, {"varsIgnorePattern": "React"}],
+    "curly": 2,
+    "eqeqeq": 2,
+    "no-multi-spaces": 2,
+    "key-spacing": 2,
+    "no-return-assign": 2,
+    "consistent-return": 0,
+    "no-shadow": 0,
+    "comma-dangle": 2,
+    "no-use-before-define": 2,
+    "no-empty": 2,
+    "new-parens": 2,
+    "no-cond-assign": 2,
+    "quotes": [2, "single", "avoid-escape"],
+    "camelcase": 0,
+    "semi": [2, "always"],
+    "new-cap": [2, { "capIsNew": false }],
+    "no-undef": 2,
+    "no-constant-condition": 2,
+    "no-extra-semi": 2,
+    "no-unexpected-multiline": 2,
+    "no-multi-str": 2,
+    "no-irregular-whitespace": 2,
+    "no-dupe-keys": 2,
+    "no-multiple-empty-lines": [2, {"max": 2}],
+    "no-this-before-super": 2,
+    "no-class-assign": 2,
+    "no-const-assign": 2,
+    "no-dupe-class-members": 2,
+    "no-console": ["error", { "allow": ["warn", "error"] }]
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "mocha": true,
+  },
+  "globals": {
+    "Symbol": true,
+    "Promise": true,
+    "TestUtils": true,
+    "assert": true,
+    "sinon": true
+  }
+}
