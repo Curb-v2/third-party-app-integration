@@ -2,7 +2,7 @@
   "SELF": "http://localhost:8000",
   "PORT": 8000,
   "AUTH_DOMAIN": "dev-energycurb.auth0.com",
-  "API_ROOT": "https://app.dev.energycurb.com/api",
+  "API_ROOT": "http://localhost:3000/api",
   "AUTH_AUDIENCE": "https://app.dev.energycurb.com",
   "AUTH_CLIENT_ID": "{{SECRET}}",
   "AUTH_CLIENT_SECRET": "{{SECRET}}",

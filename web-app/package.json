@@ -16,7 +16,8 @@
     "express-session": "^1.15.2",
     "pug": "^2.0.0-rc.1",
     "react": "^15.5.4",
-    "react-router": "^4.1.1"
+    "react-router": "^4.1.1",
+    "socket.io-client": "^2.0.2"
   },
   "browserify": {
     "transform": [

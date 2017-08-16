@@ -2,8 +2,8 @@
   var ID_TOKEN_KEY = 'idToken';
       ACCESS_TOKEN_KEY = 'accessToken';
       authKeys = [ACCESS_TOKEN_KEY, ID_TOKEN_KEY];
-      APP_HOST = 'https://app.prod.energycurb.com';
-      API_ROOT = APP_HOST + '/api/public';
+      APP_HOST = 'https://app.energycurb.com';
+      API_ROOT = APP_HOST + '/api-curb';
       AUTH_CLIENT_ID = 'hk5N2Ep8uxJcaxfeebd6nxcHQd5cFLHb',
       AUTH_DOMAIN = 'energycurb.auth0.com'
 

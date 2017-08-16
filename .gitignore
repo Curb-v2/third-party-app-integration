@@ -2,3 +2,5 @@ node_modules/
 npm-debug.log
 web-app/public/js
 web-app/app/config.json
+web-app/app/config-dev.json
+web-app/app/config-production.json
