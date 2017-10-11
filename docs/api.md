@@ -81,15 +81,15 @@ Replace `{{ACCESS_TOKEN}}` with your access token obtained above.
                   "zipCode": "78704",
                   "utilityProviderId": null,
                   "dayOfMonth": 1
-            },
-            "timezone": {
-                "rawOffset": -21600,
-                "dstOffset": 3600,
-                "status": "OK",
-                "timeZoneName": "Central Daylight Time",
-                "data": [],
-                "timeZoneId": "America/Chicago"
-            }
+              },
+              "timezone": {
+                  "rawOffset": -21600,
+                  "dstOffset": 3600,
+                  "status": "OK",
+                  "timeZoneName": "Central Daylight Time",
+                  "data": [],
+                  "timeZoneId": "America/Chicago"
+              }
           },
           "address": "1524 S IH 35",
           "country": "USA",
