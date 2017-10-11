@@ -59,7 +59,7 @@ Replace `{{ACCESS_TOKEN}}` with your access token obtained above.
   ```
 
 #### Location
-* __GET__ `/api/locations` - Get all of the users's locations. *Disclaimer: "extra_data" is an optional JSON field. There is no guarantee that it will be populated, and the key-value pairs are not validated for content, since they will hold any data an api client provides*
+* __GET__ `/api/locations` - Get all of the users's locations. *Disclaimer: "extra_data" is an optional JSON field. There is no guarantee that it will be populated, and the key-value pairs are not validated for content. They will hold any data an api client provides*
 
   * Response:
   ```json
