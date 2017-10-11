@@ -65,7 +65,32 @@ Replace `{{ACCESS_TOKEN}}` with your access token obtained above.
   ```json
   [
       {
-          "extra_data": {},
+          "extra_data": {
+              "billing": {
+                  "kwhPrice": 0.1,
+                  "currency": {
+                      "code": "USD",
+                      "name_plural": "US dollars",
+                      "decimal_digits": 2,
+                      "symbol_native": "$",
+                      "symbol": "$",
+                      "rounding": 0,
+                      "name": "US Dollar"
+                  },
+                  "type": "simple",
+                  "zipCode": "78704",
+                  "utilityProviderId": null,
+                  "dayOfMonth": 1
+            },
+            "timezone": {
+                "rawOffset": -21600,
+                "dstOffset": 3600,
+                "status": "OK",
+                "timeZoneName": "Central Daylight Time",
+                "data": [],
+                "timeZoneId": "America/Chicago"
+            }
+          },
           "address": "1524 S IH 35",
           "country": "USA",
           "geocode": "30.24306,-97.73605500000001",
@@ -75,6 +100,31 @@ Replace `{{ACCESS_TOKEN}}` with your access token obtained above.
           "hasProduction": true
       },
       {
+          "extra_data": {
+              "billing": {
+                  "kwhPrice": 0.018,
+                  "currency": {
+                      "code": "USD",
+                      "name_plural": "US dollars",
+                      "decimal_digits": 2,
+                      "symbol_native": "$",
+                      "symbol": "$",
+                      "rounding": 0,
+                      "name": "US Dollar"
+                  },
+                  "type": "utility",
+                  "zipCode": "78704",
+                  "utilityProviderId": "539fcac1ec4f024d2f53fef2",
+                  "dayOfMonth": 1
+              },
+              "timezone": {
+                  "timeZoneName": "Central Daylight Time",
+                  "rawOffset": -21600,
+                  "timeZoneId": "America/Chicago",
+                  "status": "OK",
+                  "dstOffset": 3600
+              }
+          },
           "address": "2611 S 5th St",
           "country": "USA",
           "geocode": "30.2399664,-97.7658567",
