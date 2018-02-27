@@ -3,19 +3,27 @@
       ACCESS_TOKEN_KEY = 'accessToken';
       authKeys = [ACCESS_TOKEN_KEY, ID_TOKEN_KEY];
       APP_HOST = 'https://app.energycurb.com';
-      API_ROOT = APP_HOST + '/api-curb';
-      AUTH_CLIENT_ID = 'hk5N2Ep8uxJcaxfeebd6nxcHQd5cFLHb',
+      API_ROOT = APP_HOST + '/api';
+      AUTH_CLIENT_ID = 'iKAoRkr3qyFSnJSr3bodZRZZ6Hm3GqC3',
       AUTH_DOMAIN = 'energycurb.auth0.com'
 
   var app = {
     init: function(){
       var self = this;
-      this.lock = new Auth0Lock(AUTH_CLIENT_ID, AUTH_DOMAIN);
+      this.lock = new Auth0Lock(AUTH_CLIENT_ID, AUTH_DOMAIN, {
+        auth: {
+          params: {
+            scope: 'openid profile offline_access',
+            audience: 'app.energycurb.com/api'
+          }
+        }
+      });
       if(!this.isLoggedIn()){
         if(!window.location.hash){
           this.lock.show();
         }
         this.lock.on('authenticated', function(authResult){
+          console.log(authResult);
           authKeys.forEach(function(key){
             window.localStorage.setItem(key, authResult[key]);
           });
@@ -52,18 +60,19 @@
         if(this.socket){
           this.socket.destroy();
         }
-        var socket = io(APP_HOST + '/circuit-data');
+        var socket = io(API_ROOT + '/circuit-data');
         socket.on('connect', function(){
           socket.emit('authenticate', {
-            token: window.localStorage.getItem(ID_TOKEN_KEY)
+            token: window.localStorage.getItem(ACCESS_TOKEN_KEY)
           });
         });
         socket.on('authorized', function(){
-          socket.emit('subscribe', self.locationId);
+          socket.emit('subscribe', '1c76f308-e1b6-4cae-abb8-34ba5c1dc5f9');
         })
         socket.on('data', this.renderLiveData);
         // try to reconnect when dropped
-        socket.on('disconnect', this.openLiveDataChannel.bind(this))
+        socket.on('disconnect', this.openLiveDataChannel.bind(this));
+        socket.on('error', console.error);
         this.socket = socket;
       }
     },
@@ -133,7 +142,7 @@
       return $.ajax({
         url: API_ROOT + endpoint,
         headers: {
-          'Authorization': 'Bearer ' + window.localStorage.getItem(ID_TOKEN_KEY)
+          'Authorization': 'Bearer ' + window.localStorage.getItem(ACCESS_TOKEN_KEY)
         }
       });
     },
@@ -278,7 +287,7 @@
     },
 
     isLoggedIn: function(){
-      return !!window.localStorage.getItem(ID_TOKEN_KEY);
+      return !!window.localStorage.getItem(ACCESS_TOKEN_KEY);
     },
 
     logout: function(){

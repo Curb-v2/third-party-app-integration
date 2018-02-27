@@ -13,5 +13,5 @@ This is a Node.js Express web app that makes API calls on the backed and renders
 2. You will have to create a `config.json` in the `/web-app/app` directory.  There is currently a `config-sample.json` that you can use as a template.  The important values that you will need to populate for your app are:
   * `AUTH_CLIENT_ID` - your Auth0 client ID (ask Curb for this if you do not know)
   * `AUTH_CLIENT_SECRET` - your Auth0 client secret (ask Curb for this if you do not know)
-3. Check that whatever your `AUTH_REDIRECT_URI` is in the `config.json`.  If you see an error that 
-4. To start the app, run `npm start`
+3. Check that whatever your `AUTH_REDIRECT_URI` is in the `config.json`.  If you see an Auth0 error page that says "The URL "http://localhost:8000/curb-code-grant" is not in the list of allowed callback URLs",  then contact Curb to add that URL to your list of allowed callback URLs.
+4. To start the app, run `npm start`, which starts the app at [localhost:8000](http://localhost:8000).
