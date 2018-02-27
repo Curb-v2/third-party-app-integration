@@ -1,6 +1,9 @@
 extends layout/page
 
-block main
+block header
+  a(href='/logout') Logout
+
+block main  
   h1 You are logged in as #{user.name}
   h3 Your locations
   ul

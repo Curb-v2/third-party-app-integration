@@ -1,6 +1,6 @@
-const app = require('./app');
-const config = require('./config');
-const path = require('path');
+var app = require('./app');
+var config = require('./config');
+var path = require('path');
 
 // set up views
 app.set('view engine', 'pug');

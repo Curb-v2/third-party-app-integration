@@ -1,6 +1,6 @@
-const app = require('../app');
-const config = require('../config');
-const apiService = require('../services/api');
+var app = require('../app');
+var config = require('../config');
+var apiService = require('../services/api');
 
 // secure all downstream routes
 app.use(

@@ -1,9 +1,8 @@
-const express = require('express');
-const cookieParser = require('cookie-parser');
-const config = require('../config');
-const app = require('../app');
-const session = require('express-session');
-
+var express = require('express');
+var cookieParser = require('cookie-parser');
+var config = require('../config');
+var app = require('../app');
+var session = require('express-session');
 
 app.use(
   cookieParser(
@@ -26,9 +25,9 @@ app.use(
 );
 
 // serve static files
-app.use(
-  express.static(config.STATIC_FILE_ROOT)
-);
+// app.use(
+//   express.static(config.STATIC_FILE_ROOT)
+// );
 
 require('./authentication');
 require('./routes');

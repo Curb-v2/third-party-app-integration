@@ -1,9 +1,9 @@
 {
   "SELF": "http://localhost:8000",
   "PORT": 8000,
-  "AUTH_DOMAIN": "dev-energycurb.auth0.com",
-  "API_ROOT": "http://localhost:3000/api",
-  "AUTH_AUDIENCE": "https://app.dev.energycurb.com",
+  "AUTH_DOMAIN": "energycurb.auth0.com",
+  "API_ROOT": "https://app.energycurb.com/api",
+  "AUTH_AUDIENCE": "app.energycurb.com/api",
   "AUTH_CLIENT_ID": "{{SECRET}}",
   "AUTH_CLIENT_SECRET": "{{SECRET}}",
   "AUTH_REDIRECT_URI": "http://localhost:8000/curb-code-grant",

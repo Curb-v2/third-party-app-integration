@@ -1,5 +1,5 @@
-const request = require('request');
-const config = require('../config');
+var request = require('request');
+var config = require('../config');
 
 module.exports = {
   getTokenForAuthCode: authCode => {
