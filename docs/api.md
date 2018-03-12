@@ -1,6 +1,10 @@
-## Curb Public API
-### Authentication
-There are several different OAuth flows that we support.  For simplicity, here is an example of the Authorization Code Grant flow that would be used for a traditional web app.
+# Curb Public API
+## Authentication
+To authenticate to the Curb API, you will need to be set up as an authorization client within our system.  This is quick and easy to do, just email [support@energycurb.com](mailto:support@energycurb.com) asking to be set up as a client, and we will send you your client credentials.
+
+**If you just want to set up a simple browser client and don't want to bother setting up a dedicated authentication client**, you can build a browser app using our Example Third Party APP client ID.  Please see our [example browser client application](https://github.com/Curb-v2/third-party-app-integration/tree/master/simple-browser-client) which includes the example client ID and some code to get you up and running.
+
+There are several different OAuth flows that we support.  Here is an example of the Authorization Code Grant flow that would be used for a traditional web app.
 
 1. __Get an authorization code__: You can direct your users to the following URL, which hosts a a login form allowing them to enter their username and password.
 ```
@@ -16,13 +20,13 @@ curl -X POST \
   -H 'content-type: application/json' \
   -d '{
 	"grant_type": "authorization_code",
-	"client_id": "YOUR_CLIENT_ID",
-	"client_secret": "YOUR_CLIENT_SECRET",
-	"code": "AUTHORIZATION_CODE",
+	"client_id": "{{YOUR_CLIENT_ID}}",
+	"client_secret": "{{YOUR_CLIENT_SECRET}}",
+	"code": "{{AUTHORIZATION_CODE}}",
 	"redirect_uri": "http://yourapp.com/token"
 }'
 ```
-Again, you will replace `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` with your client credentials.  `AUTHORIZATION_CODE` is your authorization code from the previous step.  `redirect_uri` must also be on your redirect url whitelist.  The above request will return a JSON response.  You can capture the `access_token` key from the response, and store that with the user's session.  The access token is a [JSON Web Token](https://jwt.io/), and you will use this token to call the Curb API on behalf of your user.
+Again, you will replace `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` with your client credentials.  `AUTHORIZATION_CODE` is your authorization code from the previous step.  `redirect_uri` must also be on your redirect url whitelist in your auth client settings (if it is not, contact us to add it).  The above request will return a JSON response.  You can capture the `access_token` key from the response, and store that with the user's session.  The access token is a [JSON Web Token](https://jwt.io/), and you will use this token to call the Curb API on behalf of your user.
 
 3. __Call the Curb API with your user's access token__: Once you have an access token for your user, you use it as the `Authorization` header for all of your requests to the Curb API.  Eg:
 ```
@@ -32,9 +36,30 @@ curl -X GET \
 ```
 Replace `{{ACCESS_TOKEN}}` with your access token obtained above.
 
-### Endpoints
+### Ad-hoc authentication for a single user
+If you are only interested in consuming the API for single user (eg. if you are a Curb user and want to build a custom app just for yourself with your username and password hardcoded), there is a simplified flow that does not require the authorization code step above.  You will instead just request an access token directly via:
 
-#### User
+```
+curl -X POST \
+  https://energycurb.auth0.com/oauth/token \
+  -H 'Cache-Control: no-cache' \
+  -H 'Content-Type: application/json' \
+  -d '{
+	"grant_type": "password",
+	"audience": "app.energycurb.com/api",
+	"username": "{{USER_EMAIL}}",
+	"password": "{{USER_PASSWORD}}",
+	"client_id": "{{YOUR_CLIENT_ID}}",
+	"client_secret": "{{YOUR_CLIENT_SECRET}}"
+}'
+
+```
+
+This will return a JSON structure with an `access_token` value that is used to call the API in the same way as step 3 above.
+
+## Endpoints
+
+### User
 * __GET__ `/api/user` - Get the user's profile:
   * Response:
   ```json
@@ -58,7 +83,7 @@ Replace `{{ACCESS_TOKEN}}` with your access token obtained above.
   }
   ```
 
-#### Location
+### Location
 * __GET__ `/api/locations` - Get all of the users's locations. *Disclaimer: "extra_data" is an optional JSON field. There is no guarantee that it will be populated, and the key-value pairs are not validated for content. They will hold any data an api client provides*
 
   * Response:
@@ -152,7 +177,7 @@ Replace `{{ACCESS_TOKEN}}` with your access token obtained above.
   ]  
   ```
 
-#### Historical
+### Historical
 __Range time units__
 
 Unit | Value | | | Resolution unit | Value
@@ -343,7 +368,7 @@ The __`resolution`__ parameter specifies what level of data resolution you would
   ]  
   ```
 
-#### Latest  
+### Latest  
 * __GET__ `/latest/:locationId` - Get the latest second sample snapshot of all circuits, plus the consumption, production, and net values
 ```js
 {
