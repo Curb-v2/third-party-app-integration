@@ -9,5 +9,8 @@
     "start": "http-server -p 8000"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "^0.11.1"
+  }
 }
