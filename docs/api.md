@@ -176,6 +176,52 @@ This will return a JSON structure with an `access_token` value that is used to c
       }
   ]  
   ```
+ 
+* __GET__ `/api/locations/:locationId/metadata` - Get location metadata for a location by id.  This includes flags indicating whether or not the location has configured mains, batteries, or prodution.  It also indicates how many hub installations are presnt, as well as some data about messages/alerts that have been received by this location.
+  * Response:
+  ```json
+  {
+    "mains": true,
+    "battery": false,
+    "production": true,
+    "installations_count": 2,
+    "dt_claimed": "2017-07-13T19:00:00.000Z",
+    "connection_health": 1,
+    "message_count": 28,
+    "unread_count": 0
+   }
+   ```
+
+* __GET__ `/api/locations/:locationId/installations` - Get a list of the hub installations present at the location.
+  * Response:
+  ```json
+  [
+    {
+	"hub": "cbas9lkr",
+	"dt_created": "2018-02-06T22:14:03.022571Z",
+	"dt_modified": "2018-05-07T19:23:46.688679Z",
+	"organization": "curb",
+	"label": "Outdoor Hub",
+	"provider": "curb",
+	"dt_claimed": "2017-07-13T19:00:00Z",
+	"panel_type": 0,
+	"location": "59fbc0d5-dc2b-416a-aa98-d6f302df7c7a"
+    },
+    {
+	"hub": "c0kw1n3y",
+	"dt_created": "2018-02-06T22:12:34.019563Z",
+	"dt_modified": "2018-05-07T19:30:51.948902Z",
+	"organization": "curb",
+	"label": "Pantry Hub",
+	"provider": "curb",
+	"dt_claimed": "2017-07-13T19:00:00Z",
+	"panel_type": 2,
+	"location": "59fbc0d5-dc2b-416a-aa98-d6f302df7c7a"
+    }
+  ]
+  ```
+  
+
 
 ### Historical
 __Range time units__
