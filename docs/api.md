@@ -196,7 +196,7 @@ This will return a JSON structure with an `access_token` value that is used to c
   * Response:
   ```json
   [
-    {
+     {
 	"hub": "cbas9lkr",
 	"dt_created": "2018-02-06T22:14:03.022571Z",
 	"dt_modified": "2018-05-07T19:23:46.688679Z",
@@ -206,8 +206,8 @@ This will return a JSON structure with an `access_token` value that is used to c
 	"dt_claimed": "2017-07-13T19:00:00Z",
 	"panel_type": 0,
 	"location": "59fbc0d5-dc2b-416a-aa98-d6f302df7c7a"
-    },
-    {
+     },
+     {
 	"hub": "c0kw1n3y",
 	"dt_created": "2018-02-06T22:12:34.019563Z",
 	"dt_modified": "2018-05-07T19:30:51.948902Z",
@@ -217,11 +217,9 @@ This will return a JSON structure with an `access_token` value that is used to c
 	"dt_claimed": "2017-07-13T19:00:00Z",
 	"panel_type": 2,
 	"location": "59fbc0d5-dc2b-416a-aa98-d6f302df7c7a"
-    }
+     }
   ]
   ```
-  
-
 
 ### Historical
 __Range time units__
