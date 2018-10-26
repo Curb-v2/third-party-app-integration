@@ -57,6 +57,8 @@ curl -X POST \
 
 This will return a JSON structure with an `access_token` value that is used to call the API in the same way as step 3 above.
 
+__This requires a password grant type, which is not enabled for new clients by default__ - if you plan on using this authentication strategy, please contact Curb support at support@energycurb.com to enable this grant type.
+
 ## Endpoints
 
 ### User
