@@ -21,7 +21,7 @@ __Client Secret__: dSoqbfwujF72a1DhwmjnqP4VAiBTqFt3WLLUtnpGDmCf6_CMQms3WEy8DxCQR
 
 These are only for development or ad-hoc requests.  These credentials are periodically revoked and regenerated, so don't expect them to last forever.  You can always come back to this document to get the latest client credentials.
 
-If you are a Curb end user and simply want to use the API to fetch more data for your Curb installation, you can use the example client credentials in the [ad-hoc authentication scheme described here](#ad-hoc-authentication-for-a-single-user).
+If you are a Curb end user and simply want to use the API to fetch more data for your Curb installation, you can use the example client credentials along with the [simplified ad-hoc authentication scheme described here](#ad-hoc-authentication-for-a-single-user).
 
 __If you are planning on using the Curb API to build a public-facing application, do not use the above example client credentials__.  If you are building a public-facing app, or want credentials that you know won't be revoked, you will need to be set up as an authorization client within our system.  This is quick and easy to do, just email [support@energycurb.com](mailto:support@energycurb.com) asking to be set up as a client, and we will send you your client credentials.
 
