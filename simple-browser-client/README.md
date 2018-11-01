@@ -1,4 +1,4 @@
-This is an example of a simple browser client that authenticates Curb users and can access historical and live data for all of their locations.
+This is an example of a simple browser client that authenticates Curb users and can access historical and live data for all of their locations.  This uses the Implicit Grant OAuth 2.0 flow.
 
 ### How to run
 This example app is designed to be run just in a browser, no back-end support necessary.  Here's all you need to run it.

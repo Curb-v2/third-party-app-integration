@@ -11,7 +11,7 @@
     <div id="login-container">
 
     </div>
-    <div class="app hidden">
+    <div class="app hidden production">
       <header>
         <div class="userinfo"></div>
         <a href="#" class="logout">Logout</a>
@@ -59,7 +59,7 @@
                 <option value="w">week</option>
               <select>
               <p>
-                <code>/api/public/historical/<span class="url-location-id">{locationId}</span>/<span class="url-historical-range">{range}</span>/<span class="url-historical-resolution">{resolution}</span></code>
+                <code>/api/historical/<span class="url-location-id">{locationId}</span>/<span class="url-historical-range">{range}</span>/<span class="url-historical-resolution">{resolution}</span></code>
                 <button>Fetch data</button>
               </p>
               <pre class="historical-results"></pre>
@@ -85,7 +85,7 @@
                 <option value="w">week</option>
               <select>
               <p>
-                <code>/api/public/aggregate/<span class="url-location-id">{locationId}</span>/<span class="url-historical-range">{range}</span>/<span class="url-historical-resolution">{resolution}</span></code>
+                <code>/api/aggregate/<span class="url-location-id">{locationId}</span>/<span class="url-historical-range">{range}</span>/<span class="url-historical-resolution">{resolution}</span></code>
                 <button>Fetch data</button>
               </p>
               <pre class="historical-results"></pre>
@@ -97,7 +97,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
-    <script src="https://cdn.auth0.com/js/lock/11.3/lock.min.js"></script>
+    <script src="https://cdn.auth0.com/js/lock/11.11/lock.min.js"></script>
     <script type="application/javascript" src="app.js"></script>
   </body>
 </html>

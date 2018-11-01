@@ -23,7 +23,6 @@
           this.lock.show();
         }
         this.lock.on('authenticated', function(authResult){
-          console.log(authResult);
           authKeys.forEach(function(key){
             window.localStorage.setItem(key, authResult[key]);
           });
@@ -55,6 +54,7 @@
 
     openLiveDataChannel: function(){
       var self = this;
+      var currrentLocation = this.getCurrentLocation();
       $('.live-data ul').empty();
       if(io){
         if(this.socket){
@@ -67,7 +67,7 @@
           });
         });
         socket.on('authorized', function(){
-          socket.emit('subscribe', '1c76f308-e1b6-4cae-abb8-34ba5c1dc5f9');
+          socket.emit('subscribe', currrentLocation.id);
         })
         socket.on('data', this.renderLiveData);
         // try to reconnect when dropped
@@ -100,7 +100,7 @@
 
     renderForLocation(){
       var currentLocation = this.getCurrentLocation();
-      $('.app').toggleClass('production', currentLocation && currentLocation.hasProduction);
+      // $('.app').toggleClass('production', currentLocation && currentLocation.hasProduction);
       this.openLiveDataChannel();
       this.renderLocations();
       this.renderHistorical();
@@ -250,7 +250,7 @@
       locationList.empty();
       this.allLocations.forEach(function(location){
         locationList.append(
-          $('<li class="location-selector">').attr('data-id', location.id).toggleClass('active', self.locationId === location.id).text(location.name)
+          $('<li class="location-selector">').attr('data-id', location.id).toggleClass('active', self.locationId === location.id).text(location.label)
         );
       });
 
@@ -258,7 +258,7 @@
         .append(
           $('<div class="info">')
             .append(
-              $('<span class="name">').text(currentLocation.name)
+              $('<span class="name">').text(currentLocation.label)
             )
             .append(
               $('<span class="address">').text(currentLocation.address + ' ' + currentLocation.postcode)

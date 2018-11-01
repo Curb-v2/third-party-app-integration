@@ -10,7 +10,8 @@
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {
+  "devDependencies": {},
+  "dependencies": {
     "http-server": "^0.11.1"
   }
 }
