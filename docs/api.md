@@ -1,8 +1,31 @@
 # Curb Public API
-## Authentication
-To authenticate to the Curb API, you will need to be set up as an authorization client within our system.  This is quick and easy to do, just email [support@energycurb.com](mailto:support@energycurb.com) asking to be set up as a client, and we will send you your client credentials.
 
-**If you just want to set up a simple browser client and don't want to bother setting up a dedicated authentication client**, you can build a browser app using our Example Third Party APP client ID.  Please see our [example browser client application](https://github.com/Curb-v2/third-party-app-integration/tree/master/simple-browser-client) which includes the example client ID and some code to get you up and running.
+## Authorization
+Our API supports Oauth 2.0.  To find out more about Oauth 2.0 and figure out which flow you should use, [read this guide](https://auth0.com/docs/api-auth/which-oauth-flow-to-use).
+
+Feel free to run our [simple-browser-client](https://github.com/Curb-v2/third-party-app-integration/tree/master/simple-browser-client) which uses the Implicit Grant flow to fetch data from our API.
+
+The end goal of any auth flow is to obtain an `access_token`, which is what the Curb API uses to validate requests.  Our public API is user scoped, meaning you have to log in as an end-user, that the user's identity is encoded into the `access_token`, and only data associated with that user is available.  Once you have an access token, you can use it to make API calls on behalf of the end user:
+```
+curl -X GET \
+  https://app.energycurb.com/api/v3/user \
+  -H 'authorization: Bearer {{ACCESS_TOKEN}}' \
+```
+Replace `{{ACCESS_TOKEN}}` with your access token.
+
+### Obtaining Client credentials
+We provide an example pair of client credentials that you can use to get up and running with our API quickly and easily.
+
+__Client ID__: iKAoRkr3qyFSnJSr3bodZRZZ6Hm3GqC3<br />
+__Client Secret__: dSoqbfwujF72a1DhwmjnqP4VAiBTqFt3WLLUtnpGDmCf6_CMQms3WEy8DxCQR3KY
+
+These are only for development or ad-hoc requests.  These credentials are periodically revoked and regenerated, so don't expect them to last forever.  You can always come back to this document to get the latest client credentials.
+
+If you are a Curb end user and simply want to use the API to fetch more data for your Curb installation, you can use the example client credentials in the [ad-hoc authentication scheme described here](#ad-hoc-authentication-for-a-single-user).
+
+__If you are planning on using the Curb API to build a public-facing application, do not use the above example client credentials__.  If you are building a public-facing app, or want credentials that you know won't be revoked, you will need to be set up as an authorization client within our system.  This is quick and easy to do, just email [support@energycurb.com](mailto:support@energycurb.com) asking to be set up as a client, and we will send you your client credentials.
+
+### Authorization code grant flow (traditional web app)
 
 There are several different OAuth flows that we support.  Here is an example of the Authorization Code Grant flow that would be used for a traditional web app.
 
@@ -31,13 +54,13 @@ Again, you will replace `YOUR_CLIENT_ID` and `YOUR_CLIENT_SECRET` with your clie
 3. __Call the Curb API with your user's access token__: Once you have an access token for your user, you use it as the `Authorization` header for all of your requests to the Curb API.  Eg:
 ```
 curl -X GET \
-  https://app.energycurb.com/api/user \
+  https://app.energycurb.com/api/v3/user \
   -H 'authorization: Bearer {{ACCESS_TOKEN}}' \
 ```
 Replace `{{ACCESS_TOKEN}}` with your access token obtained above.
 
 ### Ad-hoc authentication for a single user
-If you are only interested in consuming the API for single user (eg. if you are a Curb user and want to build a custom app just for yourself with your username and password hardcoded), there is a simplified flow that does not require the authorization code step above.  You will instead just request an access token directly via:
+If you are only interested in consuming the API for single user (eg. if you are a Curb user and want to fetch more data using your username and password), there is a simplified flow that does not require the authorization code step above.  You will instead just request an access token directly via:
 
 ```
 curl -X POST \
@@ -60,7 +83,7 @@ This will return a JSON structure with an `access_token` value that is used to c
 ## Endpoints
 
 ### User
-* __GET__ `/api/user` - Get the user's profile:
+* __GET__ `/api/v3/user` - Get the user's profile:
   * Response:
   ```json
   {
@@ -74,7 +97,7 @@ This will return a JSON structure with an `access_token` value that is used to c
       "logins_count": 319
   }
   ```
-* __PATCH__ `/api/user` - Modify the users `user_metadata` object.
+* __PATCH__ `/api/v3/user` - Modify the users `user_metadata` object.
   * The request body is a JSON object that will be merged into the existing `user_metadata` object.  If you want to remove a key from `user_metadata`, you explicitly set it to `null`. The below request body will add a key of `foo: bar` and remove the `boom`.
   ```json
   {
@@ -84,7 +107,7 @@ This will return a JSON structure with an `access_token` value that is used to c
   ```
 
 ### Location
-* __GET__ `/api/locations` - Get all of the users's locations. *Disclaimer: "extra_data" is an optional JSON field. There is no guarantee that it will be populated, and the key-value pairs are not validated for content. They will hold any data an api client provides*
+* __GET__ `/api/v3/locations` - Get all of the users's locations. *Disclaimer: "extra_data" is an optional JSON field. There is no guarantee that it will be populated, and the key-value pairs are not validated for content. They will hold any data an api client provides*
 
   * Response:
   ```json
@@ -161,7 +184,7 @@ This will return a JSON structure with an `access_token` value that is used to c
   ]  
   ```
 
-* __GET__ `/api/locations/:locationId` - Get a location by id
+* __GET__ `/api/v3/locations/:locationId` - Get a location by id
   * Response:
   ```json
   [
@@ -194,8 +217,8 @@ The __`rangeId`__ parameter is a string representing the amount of time back fro
 
 The __`resolution`__ parameter specifies what level of data resolution you would like for you response.  Note that large ranges and smaller resolutions will result in slower requests.  `s`, `m`, `5m`, and `h` are the only allowed resolution values.
 
-* __GET__ `/api/historical/:locationId/:rangeId/:resolution` - Get historical data for all circuits in the given locationId, rangeId, and resolution.  Response will be a JSON array, with one item for each circuit, and each circuit contains a `values` array with averaged samples that have a timestamp and a value in Watt-hours.
-  * Example response for `/api/historical/locationId/5m/m`:
+* __GET__ `/api/v3/historical/:locationId/:rangeId/:resolution` - Get historical data for all circuits in the given locationId, rangeId, and resolution.  Response will be a JSON array, with one item for each circuit, and each circuit contains a `values` array with averaged samples that have a timestamp and a value in Watt-hours.
+  * Example response for `/api/v3/historical/locationId/5m/m`:
   ```js
   [
       {
@@ -308,7 +331,7 @@ The __`resolution`__ parameter specifies what level of data resolution you would
   ]  
   ```
 * __GET__ `/aggregate/:locationId/:rangeId/:resolution` - Get the aggregate snapshot for each circuits for the given locationId, rangeId, and resolution.  Response will be a JSON array, with one item for each circuit.  The aggregate snapshot contains these additional values `min`, `max`, `avg`, `sum`, and `kwhr`.
-  * Example response for `/api/aggregate/locationId/5m/m`:
+  * Example response for `/api/v3/aggregate/locationId/5m/m`:
   ```js
   [
       {
