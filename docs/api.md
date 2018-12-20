@@ -13,7 +13,7 @@ curl -X GET \
 ```
 Replace `{{ACCESS_TOKEN}}` with your access token.
 
-### Obtaining Client credentials
+### Obtaining client credentials
 We provide an example pair of client credentials that you can use to get up and running with our API quickly and easily.
 
 __Client ID__: iKAoRkr3qyFSnJSr3bodZRZZ6Hm3GqC3<br />
@@ -201,7 +201,7 @@ __This requires a password grant type, which is not enabled for new clients by d
       }
   ]  
   ```
- 
+
 * __GET__ `/api/locations/:locationId/metadata` - Get location metadata for a location by id.  This includes flags indicating whether or not the location has configured mains, batteries, or prodution.  It also indicates how many hub installations are presnt, as well as some data about messages/alerts that have been received by this location.
   * Response:
   ```json
@@ -500,4 +500,206 @@ The __`resolution`__ parameter specifies what level of data resolution you would
         }
     ]
 }
+```
+
+## Real-time data
+
+Curb exposes a websocket-based API for real-time circuit data.  The data is identical to the `circuits` key on the [`/latest` endpoint described above](#latest).  Curbs send new data approximately once per second.
+
+### How to use
+
+The Curb real-time data API is powered by [socket.io](https://socket.io/), a management layer built on top of websockets.  Socket.io has a companion client library [socket.io-client](https://github.com/socketio/socket.io-client) which simplifies communicating with a socket.io server.
+
+If you wish to consume Curb's real-time data API, __it is strongly recommended that you use socket.io-client__.  It automatically handles handshaking, reconnecting, and serializing and parsing messages to and from the server.  There are official libraries for [JavaScript](https://github.com/socketio/socket.io-client), [Swift](https://github.com/socketio/socket.io-client-swift), [Java](https://github.com/socketio/socket.io-client-java), and [C++](https://github.com/socketio/socket.io-client-cpp),  You can still connect to the API with vanilla websockets, but it is much easier to use a client library.  Code examples for both options are below.
+
+Conceptually, here are the steps that you must take to begin consuming Curb live data:
+
+1. Connect to the socket.io server.
+2. Once connected, emit an `authenticate` event with your access token (the same access token used to access the REST endpoints described above).
+3. Once the server responds with an `authorized` event, a client can then emit a `subscribe` event for a location ID.
+4. The server will push JSON payloads for the subscribed location IDs.
+
+#### socket.io-client example
+The below code is taken from our [simple-browser-client example](https://github.com/Curb-v2/third-party-app-integration/blob/master/simple-browser-client/app.js) in this repo:
+```js
+import io from 'socket.io-client';
+
+const connectToLiveData = function(){
+  const socket = io('/circuit-data');
+  // connect
+  socket.on('connect', function(){
+    // once connected authenticate with
+    socket.emit('authenticate', {
+      token: USER_ACCESS_TOKEN
+    });
+  });
+
+  // once authorized, subscribe to location by id
+  socket.on('authorized', function(){
+    socket.emit('subscribe', LOCATION_ID);
+    // socket can subscribe to more locations if needed
+  })
+
+  // try to reconnect when dropped
+  socket.on('disconnect', connectToLiveData);
+
+  // log errors
+  socket.on('error', console.error);
+
+  // receive data pushed from server
+  socket.on('data', function(data){
+    // do something with data here
+    /*
+    data = {
+    	"locationId": "59fbc0d5-dc2b-416a-aa98-d6f302df7c7a",
+    	"circuits": [{
+    		"w": 745,
+    		"id": "15b70e34-a3ad-464f-85f8-549af070cf1f",
+    		"label": "Dining, Hall (1F), Bath (1F)",
+    		"grid": false,
+    		"main": false,
+    		"battery": false,
+    		"production": false,
+    		"circuit_type": "consumption"
+    	}, {
+    		"w": 241,
+    		"id": "4cb9e781-8570-4e52-b199-0dd297cc24b0",
+    		"label": "Library / Hall",
+    		"grid": false,
+    		"main": false,
+    		"battery": false,
+    		"production": false,
+    		"circuit_type": "consumption"
+    	}, {
+    		"w": 15,
+    		"id": "bd6700d4-9b58-43f7-95d7-20f3d927ce4c",
+    		"label": "Master (2F), Outdoor Lights",
+    		"grid": false,
+    		"main": false,
+    		"battery": false,
+    		"production": false,
+    		"circuit_type": "consumption"
+    	}, {
+    		"w": -91,
+    		"id": "071ec949-d0a6-4129-b2ab-827c6e023f91",
+    		"label": "Solar (South)",
+    		"grid": true,
+    		"main": false,
+    		"battery": false,
+    		"production": true,
+    		"circuit_type": "line_side_production"
+    	},
+      ... more circuits
+      ]
+    }
+    */
+  });  
+}
+
+connectToLiveData();
+
+```
+#### Vanilla websockets example
+This is much more complex than using a socket.io-client library.  Note that the URL is different, and the namespace must be joined separately.  Socket.io uses protocol codes which must be prepended to each message.  It also expects a message with both an event name and a payload, which must be serialized into the message string sent over the websocket channel.  You can avoid all of this complexity by just using the socket.io-client library ;)
+```js
+const websocket = new WebSocket('wss://app.energycurb.com/socket.io/?EIO=3&transport=websocket');
+const namespace = '/api/circuit-data';
+
+const authenticate = function(){
+  websocket.send(
+    serializeOutgoing({
+      event: 'authenticate',
+      payload: {
+        token: USER_ACCESS_TOKEN
+      }
+    })
+  );
+}
+
+const serializeOutgoing = function(message){
+  // the 42 prefix is a protocol code for a message
+  return `42${namespace},${JSON.stringify([message.event,message.payload])}`
+}
+
+const parseIncoming = function(s){
+  const splitIndex = s.indexOf(',');
+  return {
+    event: s.substr(0, splitIndex),
+    payload: JSON.parse(s.substr(splitIndex + 1))
+  };
+}
+
+websocket.onopen = function(e) {
+  // bind to the /api/circuit-data namespace
+  // the 40 prefix is a protocol code for joining a namespace
+  websocket.send('40/api/circuit-data');
+  // wait for one second for socket to join namespace before authenticating
+  setTimeout(
+    authenticate,
+    1000
+  );
+};
+
+websocket.onmessage = function(message) {
+  const { event, payload } = parseIncoming(message.data);
+  switch(event){
+    case 'authorized':
+      websocket.send(
+        serializeOutgoing({
+          event: 'subscribe',
+          payload: LOCATION_ID
+        })
+      );
+      // additional locations may be subscribed to here
+    case 'data':
+      // RECEIVED payload, do something with payload here
+      /*
+      payload = {
+      	"locationId": "59fbc0d5-dc2b-416a-aa98-d6f302df7c7a",
+      	"circuits": [{
+      		"w": 745,
+      		"id": "15b70e34-a3ad-464f-85f8-549af070cf1f",
+      		"label": "Dining, Hall (1F), Bath (1F)",
+      		"grid": false,
+      		"main": false,
+      		"battery": false,
+      		"production": false,
+      		"circuit_type": "consumption"
+      	}, {
+      		"w": 241,
+      		"id": "4cb9e781-8570-4e52-b199-0dd297cc24b0",
+      		"label": "Library / Hall",
+      		"grid": false,
+      		"main": false,
+      		"battery": false,
+      		"production": false,
+      		"circuit_type": "consumption"
+      	}, {
+      		"w": 15,
+      		"id": "bd6700d4-9b58-43f7-95d7-20f3d927ce4c",
+      		"label": "Master (2F), Outdoor Lights",
+      		"grid": false,
+      		"main": false,
+      		"battery": false,
+      		"production": false,
+      		"circuit_type": "consumption"
+      	}, {
+      		"w": -91,
+      		"id": "071ec949-d0a6-4129-b2ab-827c6e023f91",
+      		"label": "Solar (South)",
+      		"grid": true,
+      		"main": false,
+      		"battery": false,
+      		"production": true,
+      		"circuit_type": "line_side_production"
+      	},
+        ... more circuits
+        ]
+      }
+      */
+  }
+};
+
+websocket.onerror = console.error;
+
 ```
