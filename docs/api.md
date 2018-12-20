@@ -622,11 +622,18 @@ const serializeOutgoing = function(message){
 }
 
 const parseIncoming = function(s){
-  const splitIndex = s.indexOf(',');
-  return {
-    event: s.substr(0, splitIndex),
-    payload: JSON.parse(s.substr(splitIndex + 1))
-  };
+  try {
+    const splitIndex = s.indexOf(',');
+    const message = JSON.parse(s.substr(splitIndex + 1));
+    return {
+      event: message[0],
+      payload: message[1]
+    };
+  }
+  catch(err){
+    console.error(`Failed to parse incoming message ${err}`);
+    return s;
+  }
 }
 
 websocket.onopen = function(e) {
