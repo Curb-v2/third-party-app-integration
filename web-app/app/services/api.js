@@ -4,7 +4,6 @@ module.exports = {
   makeAPICall: function(accessToken, {method='GET', endpoint}){
     return new Promise(
       (resolve, reject) => {
-        console.log(accessToken);
         request(
           {
             method,
@@ -14,7 +13,10 @@ module.exports = {
               bearer: accessToken
             }
           },
-          (err, res, body) => err ? reject(err) : resolve(body)
+          (err, res, body) => {
+
+            err ? reject(err) : resolve(body)
+          }
         )
       }
     );
@@ -24,9 +26,19 @@ module.exports = {
       endpoint: '/user'
     });
   },
-  getLocations: function(accessToken){
+  getLocation: function(accessToken, locationId){
     return this.makeAPICall(accessToken, {
-      endpoint: '/locations'
-    })
+      endpoint: `/location/${locationId}`
+    });
+  },
+  listLocations: function(accessToken){
+    return this.makeAPICall(accessToken, {
+      endpoint: '/location'
+    });
+  },
+  getLatestSnapshot: function(accessToken, locationId){
+    return this.makeAPICall(accessToken, {
+      endpoint: `/latest/${locationId}`
+    });
   }
 }

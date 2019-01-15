@@ -19,13 +19,33 @@ app.use(
 app.get('/', (req, res, next) => {
   Promise.all([
     apiService.getUser(req.session.accessToken),
-    apiService.getLocations(req.session.accessToken)
+    apiService.listLocations(req.session.accessToken)
   ])
     .then(
       ([user, locations]) => {
-        res.render('logged-in', {
+        res.render('dashboard', {
           user,
           locations
+        });
+      }
+    )
+    .catch(next);
+});
+
+app.get('/location/:locationId', (req, res, next) => {
+  var accessToken = req.session.accessToken;
+  var locationId = req.params.locationId;
+  Promise.all([
+    apiService.getUser(accessToken),
+    apiService.getLocation(accessToken, locationId),
+    apiService.getLatestSnapshot(accessToken, locationId)
+  ])
+    .then(
+      ([user, location, latest]) => {
+        res.render('location-detail', {
+          user,
+          location,
+          latest
         });
       }
     )

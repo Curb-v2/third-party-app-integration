@@ -1,0 +1,38 @@
+extends layout/page
+
+block header  
+  a(href='/logout') Logout
+
+block main  
+  h1 You are logged in as #{user.name}
+  p
+    a(href='/') Back to dashboard
+  h3 #{location.label}
+  p 
+    | #{location.address}<br />
+    | #{location.city}, #{location.state}  #{location.postcode} #{location.country}
+  h3 Latest snapshot
+  div.snapshot
+    p 
+      strong timestamp:&nbsp;
+      | #{latest.timestamp}
+    p 
+      strong consumption:&nbsp;
+      | #{latest.consumption} W
+    if latest.production
+      p
+        strong production:&nbsp;
+        | #{latest.production} W
+    if latest.net
+      p
+        strong net:&nbsp;
+        | #{latest.net} W
+    h4 circuits
+    ul
+      each circuit in latest.circuits
+        li.circuit 
+          p 
+            | #{circuit.label}<br />
+            | #{circuit.w} W<br />
+            | #{circuit.circuit_type}
+                    

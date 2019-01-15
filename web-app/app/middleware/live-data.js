@@ -20,7 +20,7 @@ var connectToLiveData = function(token){
   socket.on('authorized', function(){
     // the client has been successfully authenticated, and can now subscribe to one or more locations
     // call the API to get their locations and subscribe them to the first one
-    API.getLocations(token)
+    API.listLocations(token)
       .then(
         function(locations){
           if(locations && locations.length){
