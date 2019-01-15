@@ -525,7 +525,7 @@ The below code is taken from our [simple-browser-client example](https://github.
 import io from 'socket.io-client';
 
 const connectToLiveData = function(){
-  const socket = io('/circuit-data');
+  const socket = io('https://app.energycurb.com/api/circuit-data', { transports: ['websocket'] });
   // connect
   socket.on('connect', function(){
     // once connected authenticate with
