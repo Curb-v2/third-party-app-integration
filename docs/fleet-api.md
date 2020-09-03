@@ -32,14 +32,14 @@ The `access_token` above is a JSON web token that is used to authenticate all re
 
 ```bash
 curl -X GET \
-  https://admin.energycurb.com/api-utility/ping \
+  https://admin.energycurb.com/api/ping \
   -H 'authorization: Bearer <access_token>' \
 ```
 
-Access tokens expire after 24 hours.  If you try to use your token beyond 24 hours, the Utility API will respond with a 401 error, at which point you will need to execute the client credentials request again in order to get a new token.
+Access tokens expire after 24 hours.  If you try to use your token beyond 24 hours, the Fleet API will respond with a 401 error, at which point you will need to execute the client credentials request again in order to get a new token.
 
 ## Using the API
-The Utility API root is __`https://admin.energycurb.com/api`__.  
+The Fleet API root is __`https://admin.energycurb.com/api`__.  
 
 ### What is a fleet?
 Every request is scoped to a fleet, which is a subset of Curb hubs and locations to which your client organization has access.  Curb hubs should be marked as belonging to a fleet when they are purchased by the fleet organization.  
