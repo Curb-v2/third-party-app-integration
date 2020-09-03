@@ -57,10 +57,10 @@ Other than `__isnull`, here are some other common query parameter filters you ca
   * eg. `state__in=TX,AZ` - returns all objects whose `state` property is any one of `['TX', 'AZ']`.
 * __`__ne`__ - checks if a value does not equal the queried value
   * eg. `city__ne=Phoenix` - returns all objects whose `city` property does not equal "Phoenix".  
-* __`__gt`__, __`__lt`__, __`__gte`__, __`__lte`__ - numerical comparison filters.  Useful when filtering by date
+* __`__gt`__, __`__lt`__, __`__gte`__, __`__lte`__ - numerical comparison filters.  Useful when filtering by date or other quantitative data.
   * eg. `dt_created__gt=2020-08-30T20:10:13.853850Z` - returns all values created since that date
 
-By default, this API will only return data belonging to the `<fleet>` identifier in the URL.  If that fleet is a parent organization that has subfleets organized underneath it, you can always add `include_all_subfleets=1` query parameter to any API calls to return data that includes all of the subfleets' data as well.
+By default, this API will only return data belonging to the fleet indicated by the `<fleet>` identifier in the URL.  If that fleet is a parent organization that has subfleets organized underneath it, you can always add `include_all_subfleets=1` query parameter to any API calls to return data that includes all of the subfleets' data as well.
 
 # Endpoints
 
@@ -140,7 +140,7 @@ By default, this API will only return data belonging to the `<fleet>` identifier
 * Returns a paginated list of all registers in a fleet
 * __Query parameters__ - See [Querying](#querying) above.  Common queries include:
     * `production=1` - return only registers that are configured as production
-    * `label__icontains=heater` - return only registers whose label contains the string "heater" matching case-insensitive
+    * `label__icontains=heater` - return only registers whose label contains the string "heater"
 * Response schema:
 ```json
 {
@@ -228,7 +228,7 @@ By default, this API will only return data belonging to the `<fleet>` identifier
 ```
 
 ### `/api/<fleet>/location/<location_id>/metadata`
-* Retrieve high level location metadata for a single location.
+* Retrieve high-level location metadata for a given location.
 * Response schema:
 ```json
 {
@@ -244,7 +244,7 @@ By default, this API will only return data belonging to the `<fleet>` identifier
 ```
 
 ### `/api/<fleet>/location/<location_id>/installation`
-* Retrieves a list of installations for a given location
+* Retrieves a list of installations for a given location.
 * Response schema:
 ```json
 {
@@ -280,9 +280,7 @@ By default, this API will only return data belonging to the `<fleet>` identifier
 
 ### `/api/<fleet>/location/<location_id>/register`
 * Retrieves a list of registers for a given location
-* __Query parameters__ - See [Querying](#querying) above.  Common queries include:
-    * `production=1` - return only registers that are configured as production
-    * `label__icontains=heater` - return only registers whose label contains the string "heater" matching case-insensitive
+* __Query parameters__ - See [Querying](#querying) above.
 * Response schema:
 ```json
 {
@@ -352,8 +350,6 @@ By default, this API will only return data belonging to the `<fleet>` identifier
 }
 ```
 
-
-
 ### `/api/<fleet>/installation/<hub_serial>/registers`
 * Retrieve a list of registers for a given installation by hub serial number
 * __Query parameters:__ see the location 
@@ -408,7 +404,7 @@ By default, this API will only return data belonging to the `<fleet>` identifier
 ```
 
 ### `/api/<fleet>/hub/<hub_serial>`
-* Retrieve a single hub for a given hub serial number.  The hub object gives us hardware/software information about the hub
+* Retrieve a single hub for a given hub serial number.  The hub object gives us hardware/software information about the hub.
 * Response schema:
 ```json
 {
