@@ -419,7 +419,7 @@ By default, this API will only return data belonging to the fleet indicated by t
 }
 ```
 
-### `/api/<fleet>/hub_connectivty/<hub_serial>`
+### `/api/<fleet>/hub_connectivity/<hub_serial>`
 * Returns the hub_connectivity object for the given hub serial.  This is useful if you want to determine whether or not a hub is currently online.  This record is updated every 30 minutes.
   * `connection_health` is a floating point number between `0` and `1` where `0` is a hub that has not been heard from in several minutes, and `1` is a hub that is currently online with a strong PLC connection.
 * Response schema:
