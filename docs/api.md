@@ -438,7 +438,7 @@ The __`resolution`__ parameter specifies what level of data resolution you would
   ```
 
 ### Latest  
-* __GET__ `/latest/:locationId` - Get the latest second sample snapshot of all circuits, plus the consumption, production, and net values
+* __GET__ `/latest/:locationId` - Get the latest averaged minute sample snapshot of all circuits, plus the consumption, production, and net values
 ```js
 {
     "timestamp": 1502917051,
