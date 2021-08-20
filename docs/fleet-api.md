@@ -53,14 +53,12 @@ Other than `__isnull`, here are some other common query parameter filters you ca
 
 * __`__icontains`__ - does a case insensitive search for a substring in a property
   * eg. `name__icontains=foo` - returns objects whose `label` property is a contains the string "foo"
-* __`__in`__ - checks to see if a value is one of a list of possible values
-  * eg. `state__in=TX,AZ` - returns all objects whose `state` property is any one of `['TX', 'AZ']`.
 * __`__ne`__ - checks if a value does not equal the queried value
   * eg. `city__ne=Phoenix` - returns all objects whose `city` property does not equal "Phoenix".  
 * __`__gt`__, __`__lt`__, __`__gte`__, __`__lte`__ - numerical comparison filters.  Useful when filtering by date or other quantitative data.
   * eg. `dt_created__gt=2020-08-30T20:10:13.853850Z` - returns all values created since that date
 
-By default, this API will only return data belonging to the fleet indicated by the `<fleet>` identifier in the URL.  If that fleet is a parent organization that has subfleets organized underneath it, you can always add `include_all_subfleets=1` query parameter to any API calls to return data that includes all of the subfleets' data as well.
+<!-- By default, this API will only return data belonging to the fleet indicated by the `<fleet>` identifier in the URL.  If that fleet is a parent organization that has subfleets organized underneath it, you can always add `include_all_subfleets=1` query parameter to any API calls to return data that includes all of the subfleets' data as well. -->
 
 # Endpoints
 
@@ -352,7 +350,7 @@ By default, this API will only return data belonging to the fleet indicated by t
 
 ### `/api/<fleet>/installation/<hub_serial>/registers`
 * Retrieve a list of registers for a given installation by hub serial number
-* __Query parameters:__ see the location 
+* __Query parameters__ - See [Querying](#querying) above.
 * Response schema:
 ```json
 {
@@ -415,6 +413,7 @@ By default, this API will only return data belonging to the fleet indicated by t
     "model_number": "00617",
     "software": "2.1.0-staging",
     "os": null,
+    "phase_count": 2,
     "hardware": "1.5"
 }
 ```
@@ -460,5 +459,293 @@ By default, this API will only return data belonging to the fleet indicated by t
 }
 ```
 
+## Historical data
+The historical API endpoints allow you to query for the state of a given location at any date range in the past.
 
-Documentation for our historical and real-time data services coming soon
+### `/api/<fleet>/location/<location_id>/historical`
+* Retrieve a list of historical samples for the given location over a given time range.
+* __Query parameters__
+  * __`start_time (required)`__ - A UTC timestamp.  Return values are inclusive of `start_time`.
+  * __`end_time (required)`__  - A UTC timestamp.  Return values are inclusive of `end_time`.
+  * __`resolution`__ - The size of the sample period.  A more granular resolution will result in a greater number of samples being returned in the response.  If omitted, `resolution` will be the coarsest possible resolution to effectively cover the queried time range.  `resolution` can be any one of the following:
+    * `m` : one minute
+    * `5m` : five minutes
+    * `h` : one hour
+    * `d` : one day
+  * __`add_other`__ - When truthy, this will add a virtual register labelled "Other" which represents the difference between grid-measuring registers and non grid-measuring registers.  In practice, "Other" typically represents any consumption that is not being measured.
+  * __`include_all_metrics`__ - When truthy, this will include all metrics across both registers and phases.  When omitted, the only metric that is returned is wattage.
+  * __`omit_registers`__ - When truthy, this will omit the `registers` array from the response, making for a smaller payload.
+  * __Handling missing data__:  These options are useful if you want to handle missing data in the response.  Data can be missing if hubs are temporarily offline, or if data is still being processed by the cloud.
+    * __`interpolate`__ - When truthy, this will perform linear interpolation for any partial missing missing data in the range.  Partial missing data is where for a given timestamp where data from one or more hubs is present, but data from one or more hubs is missing.  Interpolation can only take place if one or more data points exist in the range.
+    * __`fill_all_gaps`__ - When truthy, this ensures that a complete result is returned for every timestamp in the range will have a result, even if data is missing.  When using this parameter, by default missing data values will be filled with `null`.  If this parameter is used in conjunction with `interpolate`, missing data will be filled with linear interpolated data.
+
+The response contains a `results` array contains a list of objects which contain: 
+  * `t` - the timestamp representing the __start__ of that sample period.  
+  * `r` - an object containing average register-level readings over the sample period.  Those readings can be:
+    * `w` - power (watt-hours)
+    * `i` - current (amps)
+    * `var` - reactive power (var)
+    * `p` - power factor (cosφ)
+  * `ph` - an object containing average phase-level readings over the sample period.  Those readings can be:
+    * `v` - voltage (volts)
+    * `f` - frequency (Hz)
+    * `t` - THD fundamental
+    * `tg` - THD group
+    * `ts` - THD subgroup
+
+By default, there is a `registers` array that is included in the response.  For each numeric value in the `r` value arrays, __the register that it corresponds to is based on its positional index in the array__.  The value readings for the first register in the `registers` array are the first in each `r` value array, and the readings for the second registers are the second in each `r` value array, and so on.  This structure is designed to keep the payload size small.  If you want to reduce the payload size further and you already have a list of the location registers, you can use `?omit_register=1` to remove them from the historical response.
+
+Example response:
+```json
+{
+    "count": 12,
+    "start": 1600160400,
+    "end": 1600163999,
+    "resolution": "5m",
+    "hubs": [
+        "cbas9lkr",
+        "c0kw1n3y"
+    ],
+    "registers": [
+        {
+            "id": "5c89cba5-d348-480e-a895-5032b3ae1c1f",
+            "label": "Guest, Hall (2F)",
+            "group": 0,
+            "channel": 0,
+            "grid": false,
+            "production": false,
+            "battery": false
+        },
+        // ... etc ...
+    ],
+    "results": [
+        {
+            "t": 1600160400,
+            "r": {
+                "w": [ 944, 0, 0, 0, 0, 0, 675, 0, 0, 0, 73, 97, 484, 0, 0, 327, 0, 0, 0, 0, 0, 41, 23, 124, 0, 0, 0, 0, 0, 120, 0, 43, 0, 93, 25, 76 ]
+            }
+        },
+        {
+            "t": 1600160700,
+            "r": {
+                "w": [ 885, 0, 0, 0, 0, 0, 616, 0, 0, 0, 74, 96, 485, 0, 0, 327, 0, 0, 0, 0, 0, 41, 23, 10, 0, 0, 0, 0, 0, 121, 0, 39, 0, 91, 25, 77 ]
+            }
+        },
+        // ... etc ...
+    ]
+}
+```
+
+Example response with `?include_all_metrics=1`:
+```js
+{
+    "count": 12,
+    "start": 1600160400,
+    "end": 1600163999,
+    "resolution": "5m",
+    "hubs": [
+        "cbas9lkr",
+        "c0kw1n3y"
+    ],
+    "registers": [
+        {
+            "id": "43492557-a1d5-4aee-9382-dd01aea923c7",
+            "label": "Main I",
+            "group": 0,
+            "channel": 0,
+            "grid": true,
+            "production": false,
+            "battery": false
+        },
+        // ... etc ...
+    ],
+    "results": [
+        {
+            "t": 1600160400,
+            "r": {
+                "w": [ 944, 0, 0, 0, 0, 0, 675, 0, 0, 0, 73, 97, 484, 0, 0, 327, 0, 0, 0, 0, 0, 41, 23, 124, 0, 0, 0, 0, 0, 120, 0, 43, 0, 93, 25, 76  ],
+                "i": [ 8.91129, 0.313598, -0.180953, -0.57738, 0.0100264, 0.0128584, 5.89242, 0.0791024, 0.00377053, 0.00378806, 0.647756, 1.76359, 4.48799, 0.0161248, 0.00389033, 3.0919, 0.00383073, 0.00380384, 0.00544036, 0.0104897, 0.0930977, 0.533472, 0.693767, 2.97793, 0.0887351, 0.0199297, 0.108851, 0.0315248, 0.0615197, 1.37082, 0.0978306, 0.517392, 0.0111373, 2.95713, 0.287875, 0.815996 ],
+                "var": [ -261, -36, -21, -66, 0, 0, 0, 0, 0, 0, 19, 151, 189, 0, 0, 152, 0, 0, 0, 0, 0, 24, 75, 156, 0, 0, 0, 0, 0, 0, 0, 24, 0, 309, 11, 48  ],
+                "p": [ 0.957963, -0.0254771, 0.0177084, 0.0342777, 0.728773, 0.763866, 0.997617, 0.576707, 0.191507, 0.160577, 0.968551, 0.453751, 0.926829, 0.762625, 0.15187, 0.911639, 0.000862274, 0.000251709, 0.55091, 0.497363, 0.769395, 0.721912, 0.362256, 0.266048, 0.649236, 0.922811, 0.989916, 0.745177, 0.738845, 0.999794, 0.575275, 0.827033, 0.993655, 0.30355, 0.973018, 0.758378 ]
+            },
+            "ph": {
+                "v": [ 
+                    [ 119.52, 119.223, 120.088, 120.182 ], 
+                    [ 120.268, 119.971, 119.021, 119.186 ]  
+                ],
+                "f": [ 
+                    [ 59.999, 59.9877, 59.9893, 59.9888 ], 
+                    [ 59.9908, 59.9879, 59.9894, 59.9887 ]
+                ]
+            }
+        },
+        // ... etc ...
+    ]
+}
+```
+
+### `/api/<fleet>/location/<location_id>/aggregate`
+* Retrieve a summary for each register the given location over a given time range.  This endpoint is most commonly used to retrieve average power (watt-hours) and energy (kWh) over an arbitrary time range.
+* __Query parameters__
+  * __`start_time (required)`__ - A UTC timestamp.  Return values are inclusive of `start_time`.
+  * __`end_time (required)`__  - A UTC timestamp.  Return values are inclusive of `end_time`.
+  * __`resolution`__ - The size of the sample period.  A more granular resolution will result in a greater number of samples being returned in the response.  If omitted, `resolution` will be the coarsest possible resolution to effectively cover the queried time range.  `resolution` can be any one of the following:
+    * `m` : one minute
+    * `5m` : five minutes
+    * `h` : one hour
+    * `d` : one day
+  * __`add_other`__ - When truthy, this will add a virtual register labelled "Other" which represents the difference between grid-measuring registers and non grid-measuring registers.  In practice, "Other" typically represents any consumption that is not being measured.
+
+```js
+{
+    "samples_count": 24,
+    "start": 1600160400,
+    "end": 1600163999,
+    "hubs": [
+        "c0kw1n3y",
+        "cbas9lkr"
+    ],
+    "resolution": "5m",
+    "results": [
+        {
+            "avg": 967,
+            "min": 738,
+            "max": 1483,
+            "sum": 11603,
+            "kwh": 0.968,
+            "register": {
+                "id": "5c89cba5-d348-480e-a895-5032b3ae1c1f",
+                "label": "Guest, Hall (2F)",
+                "group": 0,
+                "channel": 0,
+                "grid": false,
+                "production": false,
+                "battery": false
+            }
+        },
+        // ... etc ...
+    ]
+}
+```
+<!-- 
+### `/api/<fleet>/location/<location_id>/latest`
+* Retrieves the most recent seconds-level sample for the given location.  If there are no samples in the last 10 seconds, this will return a 400 error.  Although the real time API described below is faster and performs better, this endpoint can be used in situations where websockets might not be available.
+* __Query parameters__
+  * __`add_other`__ - When truthy, this will add a virtual register labelled "Other" which represents the difference between grid-measuring registers and non grid-measuring registers.  In practice, "Other" typically represents any consumption that is not being measured.
+  * __`include_all_metrics`__ - When truthy, this will include all metrics across both registers and phases.  When omitted, the only metric that is returned is wattage.
+  * __`omit_registers`__ - When truthy, this will omit the `registers` array from the response, making for a smaller payload.
+  * __Handling missing data__:  These options are useful if you want to handle missing data in the response.  Data can be missing if hubs are temporarily offline, or if data is still being processed by the cloud.
+    * __`interpolate`__ - When truthy, this will perform linear interpolation for any partial missing missing data in the range.  Partial missing data is where for a given timestamp where data from one or more hubs is present, but data from one or more hubs is missing.  Interpolation can only take place if one or more data points exist in the range.
+    * __`fill_all_gaps`__ - When truthy, this ensures that a complete result is returned for every timestamp in the range will have a result, even if data is missing.  When using this parameter, by default missing data values will be filled with `null`.  If this parameter is used in conjunction with `interpolate`, missing data will be filled with linear interpolated data.
+
+The response follows the same schema as the `/historical` endpoint described above.
+
+## Real time API
+Using our real time API, you can subscribe to a "stream" of live data for one or more locations in your fleet.  Using the websocket protocol, the real time API pushes hub sample data as soon as it is received (approximately 1 sample per second per hub in a given location).  
+
+The real time API expects JSON for both inbound and outbound messages.  All messages, both inbound and outbound, should have the following format:
+
+```js
+{
+    "type": "<event_type>",
+    "payload": {
+        /* payload data goes here */
+    }
+}
+```
+
+Every message should have an event type designated by the `type` value to indicate what to do with the given message.  Possible types that can server can send are:
+
+__Server message event types__ - these are event types a websocket client can receive from the server:
+* `live` - a new live data snapshot
+* `status` - a status message about the websocket connection
+* `error` - an error.  It's `payload` should have a `message` string.
+* `request_response` - a response to a client `request` event
+
+__Client message event types__ - these are event types that a websocket client can send to the server:
+* `subscribe` - subscribe to start receiving updates on a particular data type, usually a location
+* `unsubscribe` - unsubscribe to stop receiving updates on particular data type, usually a location
+* `request` - make a ad-hoc request for data
+
+#### Authenticating to the real time API
+
+Authenticating to the real time API works in much the same way as the REST API.  Once you [obtain a token as described in the Authentication section above](#authentication), use it in the `Authentication` header of the WebSocket handshake.  Here is an example of how that would be done using the [ws](https://github.com/websockets/ws) JavaScript library:
+
+```js
+const WebSocket = require('ws');
+const socket = new WebSocket('wss://admin.energycurb.com/live.io', [], {
+    headers: {
+        // `accessToken` is the JWT received from the authentication request
+        authorization: `Bearer ${accessToken}`
+    }
+});
+```
+
+#### Subscribing to a location
+After connecting, a can now send the following message to subscribe to a location:
+
+```js
+// client message
+{
+    "type": "subscribe",
+    "payload": {
+        "location": "<location_id>"
+    }
+}
+```
+
+After successfully subscribing, the client will start receiving `live` events at the rate of of approximately 1 message per second per hub, which come in the following format:
+
+```js
+// server message
+{ 
+    "type": "live",
+    "payload": { 
+        "location": "<location_id",
+        "data": { 
+            "t": 1600364387, 
+            "r": {
+                "w": [ 52, 0, 0, 40, 22, 35, 0, 0, 27, 0, 0, 14, 106, 54, 0, 497, 14, 28, 1134, -1133, 0, -666, 0, 0, 804, 0, 0, 0, 0, 124, 481, 0, 0, 325, 0, 0 ]
+            }
+        } 
+    } 
+}
+```
+
+The format is similar to the historical API response.  You will need a list of registers, which will map to the appropriate wattage value by index.  A client can either request those registers via the REST API, or as a convenience, you can request them through the real time API.  
+
+```js
+// client message
+{
+    "type": "request",
+    "payload": {
+        "location": "<location_id>",
+        "data_type": "registers"
+    }
+}
+```
+
+Upon receiving the request, the server will respond with the following message:
+
+```js
+// server message
+{ 
+    "type": "request_response",
+    "payload": { 
+        "data_type": "registers",        
+        "location": "59fbc0d5-dc2b-416a-aa98-d6f302df7c7a",
+        "data": [ 
+            {
+                "id": "5c89cba5-d348-480e-a895-5032b3ae1c1f",
+                "label": "Guest, Hall (2F)",
+                "group": 0,
+                "channel": 0,
+                "grid": false,
+                "production": false,
+                "battery": false
+            },
+            // ... etc ...
+        ] 
+    } 
+}
+``` -->
