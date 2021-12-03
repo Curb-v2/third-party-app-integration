@@ -1,0 +1,199 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Curb Public API V4
+  description: "
+    This API is for Curb end-users or for developers looking to build an end-user facing application.  Authentication is performed via Auth0.  Once you have an access token, you can interact with this API clicking the \"Authorize\" button below.
+    \n\n
+    If you are looking for realtime data, that is documented separately"
+  license:
+    name: MIT
+servers:
+  - url: https://app.energycurb.com/api/v4
+  - url: https://app.staging.energycurb.com/api/v4
+security:
+  - bearerAuth: []
+
+paths: 
+  /user:
+    get:
+      summary: Show the current user
+      operationId: getUser
+      tags:
+        - User
+      responses: 
+        '200':
+          description: Valid request
+          content:
+            application/json:    
+              schema:
+                type: object
+                properties:
+                  auth0:
+                    $ref: "#/components/schemas/Auth0User"
+                  accepted_eula:
+                    type: boolean
+                  accepted_hazard_warning:
+                    type: boolean
+                  accepted_provider_agreement:
+                    type: boolean
+                  default_location:
+                    type: string
+                    format: uuid
+                    nullable: true
+                  dt_created:
+                    type: string
+                    format: date-time
+                  dt_modified:
+                    type: string
+                    format: date-time
+                  email_address:
+                    type: string
+                    format: email
+                  live_data_unit:
+                    type: string
+                    nullable: true
+                  phone_number:
+                    type: string
+                    nullable: true
+                  user_type:
+                    type: string
+                    enum: [homeowner]
+                example:
+                  user_id: "auth0|5fa1f61691dfd60072b812dc"
+                  notificationsettings:
+                    user: "auth0|5fa1f61691dfd60072b812dc"
+                    dt_created: "2020-12-14T22:44:37.392543Z"
+                    dt_modified: "2020-12-14T22:44:37.392577Z"
+                    notification_types:
+                      - direct
+                      - solar_status
+                      - hub_status
+                  useraccess_set:
+                  - location:
+                      id: bb2a7430-3143-44b6-9f0d-22890b2c7f92
+                      dt_created: '2019-01-28T17:13:49.593389Z'
+                      dt_modified: '2021-11-22T22:48:13.475634Z'
+                      organization: curb
+                      label: Main House
+                      country: USA
+                      state: TX
+                      city: Austin
+                      postcode: '78744'
+                      address: 1234 Grey Stone Drive
+                      geocode: 30.19631100,-97.73080700
+                      timezone: America/Chicago
+                    installation:
+                    access_level: full
+                    fleet:
+                    id: 5dad292c-31d0-4f2b-9f55-bf755a821ecc
+                  dt_created: '2020-11-04T00:31:06.263067Z'
+                  dt_modified: '2021-11-22T22:51:34.077206Z'
+                  name: Test User
+                  user_type: homeowner
+                  phone_number: "+15125551234"
+                  email_address: test+staging@energycurb.com
+                  provider: curb
+                  accepted_eula: true
+                  walkthrough_complete: false
+                  accepted_provider_agreement: false
+                  accepted_hazard_warning: false
+                  default_location:
+                  live_data_unit: w      
+                    
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    
+  schemas:
+    Auth0User:
+      type: object
+      properties:
+        created_at: 
+          type: string
+          format: date-time
+        updated_at: 
+          type: string
+          format: date-time
+        user_id:
+          type: string
+        email:
+          type: string
+          format: email
+        email_verified:
+          type: boolean
+        iat:
+          type: integer
+          description: Unix timestamp
+        exp:
+          type: integer
+          description: Unix timestamp
+        iss:
+          type: string
+          format: url
+        impersonated:
+          type: boolean
+        last_ip: 
+          type: string
+        last_login: 
+          type: string
+          format: date-time
+        last_password_reset: 
+          type: string
+          format: date-time
+        logins_count:
+          type: integer
+        picture:
+          type: string
+          format: url        
+      example:
+        nickname: "test+staging"
+        name: "test+staging@energycurb.com"
+        picture: "https://s.gravatar.com/avatar/af23e57041db34ef2b83c2c8e40b29cf?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fte.png"
+        updated_at: "2021-11-22T22:41:56.756Z"
+        email: "test+staging@energycurb.com"
+        email_verified: false
+        iss: "https://staging-energycurb.auth0.com/"
+        sub: "auth0|5fa1f61691dfd60072b812dc"
+        aud: "BZO5TDNSZ7IOTSNvkkmGlZp34fV9NzRg"
+        iat: 1638487783
+        exp: 1638523783
+        at_hash: "LJuQt8v_wkPtYrupOSot-w"
+        created_at: "2020-11-04T00:30:14.847Z"
+        identities:
+          - user_id: "5fa1f61691dfd60072b812dc"
+            provider: "auth0"
+            connection: "Users"
+            isSocial: false
+        user_id: "auth0|5fa1f61691dfd60072b812dc"
+        last_ip: "136.49.149.11"
+        last_login: "2021-11-22T22:41:56.756Z"
+        logins_count: 32
+    Location:
+      type: object
+      properties: 
+        id:
+          type: string
+          format: uuid
+      example:
+        id: bb2a7430-3143-44b6-9f0d-22890b2c7f92
+        dt_created: 2019-01-28T17:13:49.593389Z
+        dt_modified: 2021-11-22T22:48:13.475634Z
+        organization: curb
+        label: Main house
+        country: "USA"
+        state: "TX"
+        city: "Austin"
+        postcode: "78744"
+        address: "1234 Grey Stone Drive"
+        geocode: "30.19631100,-97.73080700"
+        timezone: "America/Chicago"
+    UserAccess: 
+      type: object
+      properties: 
+        location: 
+          $ref: "#/components/schemas/Location"
+          nullable: true
+          
