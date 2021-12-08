@@ -1,3 +1,5 @@
+# https://peterevans.dev/posts/how-to-host-swagger-docs-with-github-pages/
+
 openapi: "3.0.0"
 info:
   version: 1.0.0
@@ -29,8 +31,6 @@ paths:
               schema:
                 type: object
                 properties:
-                  auth0:
-                    $ref: "#/components/schemas/Auth0User"
                   accepted_eula:
                     type: boolean
                   accepted_hazard_warning:
@@ -59,6 +59,12 @@ paths:
                   user_type:
                     type: string
                     enum: [homeowner]
+                  useraccess_set:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/UserAccess"
+                  auth0:
+                    $ref: "#/components/schemas/Auth0User"
                 example:
                   user_id: "auth0|5fa1f61691dfd60072b812dc"
                   notificationsettings:
@@ -100,7 +106,689 @@ paths:
                   accepted_hazard_warning: false
                   default_location:
                   live_data_unit: w      
-                    
+                  auth0:
+                    nickname: "test+staging"
+                    name: "test+staging@energycurb.com"
+                    picture: "https://s.gravatar.com/avatar/af23e57041db34ef2b83c2c8e40b29cf?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fte.png"
+                    updated_at: "2021-11-22T22:41:56.756Z"
+                    email: "test+staging@energycurb.com"
+                    email_verified: false
+                    iss: "https://staging-energycurb.auth0.com/"
+                    sub: "auth0|5fa1f61691dfd60072b812dc"
+                    aud: "BZO5TDNSZ7IOTSNvkkmGlZp34fV9NzRg"
+                    iat: 1638487783
+                    exp: 1638523783
+                    at_hash: "LJuQt8v_wkPtYrupOSot-w"
+                    created_at: "2020-11-04T00:30:14.847Z"
+                    identities:
+                      - user_id: "5fa1f61691dfd60072b812dc"
+                        provider: "auth0"
+                        connection: "Users"
+                        isSocial: false
+                    user_id: "auth0|5fa1f61691dfd60072b812dc"
+                    last_ip: "136.49.149.11"
+                    last_login: "2021-11-22T22:41:56.756Z"
+                    logins_count: 32                    
+  /locations:
+    get:
+      summary: List locations to which the given user has access
+      operationId: listLocationsForUser
+      tags:
+        - Location
+      parameters:
+        - in: query
+          name: page_size
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:    
+              schema:
+                type: object
+                properties:
+                  count: 
+                    type: integer
+                  prev:
+                    type: string
+                    format: url
+                  next:
+                    type: string
+                    format: url
+                  results: 
+                    type: array
+                    items: 
+                      $ref: "#/components/schemas/Location"
+                example:
+                  count: 1
+                  prev: null
+                  next: null
+                  results: 
+                    - id: bb2a7430-3143-44b6-9f0d-22890b2c7f92
+                      dt_created: '2019-01-28T17:13:49.593389Z'
+                      dt_modified: '2021-11-22T22:48:13.475634Z'
+                      organization: curb
+                      label: Main House
+                      country: USA
+                      state: TX
+                      city: Austin
+                      postcode: '78744'
+                      address: 1234 Grey Stone Drive
+                      geocode: 30.19631100,-97.73080700
+                      timezone: America/Chicago
+  /locations/{location_id}:
+    get:
+      summary: Get a location by location id
+      operationId: getLocation
+      parameters:
+        - in: path
+          name: location_id
+          schema:
+            type: string
+            format: uuid
+          required: true
+      tags:
+        - Location
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:    
+              schema:
+                type: object
+                $ref: "#/components/schemas/Location"
+              example: 
+                id: bb2a7430-3143-44b6-9f0d-22890b2c7f92
+                dt_created: '2019-01-28T17:13:49.593389Z'
+                dt_modified: '2021-11-22T22:48:13.475634Z'
+                organization: curb
+                label: Main House
+                country: USA
+                state: TX
+                city: Austin
+                postcode: '78744'
+                address: 1234 Grey Stone Drive
+                geocode: 30.19631100,-97.73080700
+                timezone: America/Chicago
+    patch:
+      summary: Update a location by location id
+      operationId: updateLocation
+      parameters:
+        - in: path
+          name: location_id
+          schema:
+            type: string
+            format: uuid
+          required: true      
+      tags:
+        - Location
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Location'
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:    
+              schema:
+                type: object
+                $ref: "#/components/schemas/Location"
+              example: 
+                organization: curb
+                label: Main House
+                country: USA
+                state: TX
+                city: Austin
+                postcode: '78744'
+                address: 1234 Grey Stone Drive
+                geocode: 30.19631100,-97.73080700
+                timezone: America/Chicago                
+
+  /locations/{location_id}/installations:
+    get:
+      summary: List installations for a location
+      operationId: listInstallationsForLocation
+      parameters:
+        - in: path
+          name: location_id
+          schema:
+            type: string
+            format: uuid
+          required: true      
+      tags:
+        - Location
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:    
+              schema:
+                type: object          
+                properties:
+                  count: 
+                    type: integer
+                  prev:
+                    type: string
+                    format: url
+                  next:
+                    type: string
+                    format: url
+                  results: 
+                    type: array
+                    items: 
+                      $ref: "#/components/schemas/Installation"
+                example:
+                  count: 1
+                  prev: null
+                  next: null
+                  results: 
+                    - dt_created: '2019-01-28T17:13:49.593389Z'
+                      dt_modified: '2021-11-22T22:48:13.475634Z'
+                      hub: crhs5ma2
+                      location: bb2a7430-3143-44b6-9f0d-22890b2c7f92
+                      fleet: curb
+                      organization: curb
+                      state: active
+                      dt_state_changed: '2021-05-11T18:15:33.042826Z'
+
+  /locations/{location_id}/registers:
+    get:
+      summary: List registers for a location
+      operationId: listRegistersForLocation
+      parameters:
+        - in: path
+          name: location_id
+          schema:
+            type: string
+            format: uuid
+          required: true      
+      tags:
+        - Location
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:    
+              schema:
+                type: object          
+                properties:
+                  count: 
+                    type: integer
+                  prev:
+                    type: string
+                    format: url
+                  next:
+                    type: string
+                    format: url
+                  results: 
+                    type: array
+                    items: 
+                      $ref: "#/components/schemas/Register"
+                example:
+                  count: 18
+                  next:
+                  previous:
+                  results:
+                  - id: fb86a932-5be1-4e98-a077-802e56ea139c
+                    dt_created: '2018-05-05T20:36:15.259971Z'
+                    dt_modified: '2019-07-19T23:23:02.541447Z'
+                    organization: curb
+                    label: HVAC1 Office Guest
+                    number: 0
+                    circuit_type: consumption
+                    multiplier: 2
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN30
+                    group: 0
+                    channel: 0
+                    grid: false
+                    production: false
+                    battery: false
+                    circuit_number: 12
+                  - id: 8491c141-2753-44a0-9e3d-d44fdae25b37
+                    dt_created: '2018-04-25T19:19:33.389580Z'
+                    dt_modified: '2019-07-19T23:23:30.902210Z'
+                    organization: curb
+                    label: HVAC2 Master Downstairs
+                    number: 1
+                    circuit_type: consumption
+                    multiplier: 2
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN30
+                    group: 0
+                    channel: 1
+                    grid: false
+                    production: false
+                    battery: false
+                    circuit_number: 13
+                  - id: 9dade1b9-e01d-4724-9e96-b42e6ba210d2
+                    dt_created: '2018-04-25T19:19:33.492263Z'
+                    dt_modified: '2019-07-19T23:23:48.259279Z'
+                    organization: curb
+                    label: Water Heater
+                    number: 2
+                    circuit_type: consumption
+                    multiplier: 2
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN30
+                    group: 0
+                    channel: 2
+                    grid: false
+                    production: false
+                    battery: false
+                    circuit_number: 8
+                  - id: ff88d41a-2378-44fb-acc6-5f26a70b872a
+                    dt_created: '2018-04-25T19:19:33.619658Z'
+                    dt_modified: '2019-01-18T00:12:47.574238Z'
+                    organization: curb
+                    label: Master Lgt Out
+                    number: 3
+                    circuit_type: consumption
+                    multiplier: 1
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN30
+                    group: 0
+                    channel: 3
+                    grid: false
+                    production: false
+                    battery: false
+                    circuit_number: 16
+                  - id: e6505f03-ef05-4590-91a6-4d694bcde87c
+                    dt_created: '2018-04-25T19:19:33.750621Z'
+                    dt_modified: '2019-04-06T16:30:20.145982Z'
+                    organization: curb
+                    label: LR Lgt/LR SR Out
+                    number: 4
+                    circuit_type: consumption
+                    multiplier: 1
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN30
+                    group: 0
+                    channel: 4
+                    grid: false
+                    production: false
+                    battery: false
+                    circuit_number: 20
+                  - id: a03c9b7a-dbf9-4ac2-8c06-040096dff964
+                    dt_created: '2018-04-25T19:19:33.857545Z'
+                    dt_modified: '2019-07-19T23:32:13.265039Z'
+                    organization: curb
+                    label: Main A
+                    number: 5
+                    circuit_type: main
+                    multiplier: 1
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN100
+                    group: 0
+                    channel: 5
+                    grid: true
+                    production: false
+                    battery: false
+                    circuit_number: 21
+                  - id: 5bff5b13-9ab5-4cf7-816d-779be9130870
+                    dt_created: '2018-05-05T20:36:16.149460Z'
+                    dt_modified: '2019-07-19T23:25:28.483046Z'
+                    organization: curb
+                    label: Dryer
+                    number: 6
+                    circuit_type: consumption
+                    multiplier: 2
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN50
+                    group: 1
+                    channel: 0
+                    grid: false
+                    production: false
+                    battery: false
+                    circuit_number:
+                  - id: 5e0c1180-4172-402d-ad83-3e4b0a4cd5a5
+                    dt_created: '2018-04-25T19:19:33.950872Z'
+                    dt_modified: '2019-07-19T23:25:50.787879Z'
+                    organization: curb
+                    label: Washing Machine
+                    number: 7
+                    circuit_type: consumption
+                    multiplier: 1
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN30
+                    group: 1
+                    channel: 1
+                    grid: false
+                    production: false
+                    battery: false
+                    circuit_number: 1
+                  - id: a7fdf8c2-5f65-402a-ad13-5bcf5991ca6d
+                    dt_created: '2018-04-25T19:19:34.157020Z'
+                    dt_modified: '2019-07-19T23:26:12.194469Z'
+                    organization: curb
+                    label: EVSE
+                    number: 8
+                    circuit_type: consumption
+                    multiplier: 2
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN50
+                    group: 1
+                    channel: 2
+                    grid: false
+                    production: false
+                    battery: false
+                    circuit_number: 14
+                  - id: b60e3fb0-9f95-41b4-9745-15065c75173e
+                    dt_created: '2018-04-25T19:19:34.260954Z'
+                    dt_modified: '2019-07-19T23:26:43.768516Z'
+                    organization: curb
+                    label: Refrig MW DW
+                    number: 9
+                    circuit_type: consumption
+                    multiplier: 1
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN30
+                    group: 1
+                    channel: 3
+                    grid: false
+                    production: false
+                    battery: false
+                    circuit_number: 3
+                  - id: 54307de7-2396-4f47-ae88-40d7923ad047
+                    dt_created: '2018-04-25T19:19:34.386771Z'
+                    dt_modified: '2020-02-07T21:49:53.746539Z'
+                    organization: curb
+                    label: PowerWall B
+                    number: 10
+                    circuit_type: breaker_side_battery
+                    multiplier: 2
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN30
+                    group: 1
+                    channel: 4
+                    grid: false
+                    production: false
+                    battery: true
+                    circuit_number: 5
+                  - id: '08018513-b603-485e-9626-9b9a035f20c0'
+                    dt_created: '2018-04-25T19:19:34.520272Z'
+                    dt_modified: '2019-01-20T01:39:06.050297Z'
+                    organization: curb
+                    label: Off Gst Kit DR SR Lgt
+                    number: 11
+                    circuit_type: consumption
+                    multiplier: 1
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN30
+                    group: 1
+                    channel: 5
+                    grid: false
+                    production: false
+                    battery: false
+                    circuit_number: 7
+                  - id: 4bd5ac09-7df6-4120-8982-e1d57f4b61c2
+                    dt_created: '2018-04-25T19:19:34.642976Z'
+                    dt_modified: '2019-07-19T23:28:25.162138Z'
+                    organization: curb
+                    label: Dining Out
+                    number: 12
+                    circuit_type: consumption
+                    multiplier: 1
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN30
+                    group: 2
+                    channel: 0
+                    grid: false
+                    production: false
+                    battery: false
+                    circuit_number: 4
+                  - id: ee67b067-2a22-4712-ad3a-56a71c40a736
+                    dt_created: '2018-04-25T19:19:35.013548Z'
+                    dt_modified: '2019-07-19T23:28:44.350430Z'
+                    organization: curb
+                    label: Kitchen Out
+                    number: 13
+                    circuit_type: consumption
+                    multiplier: 1
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN30
+                    group: 2
+                    channel: 1
+                    grid: false
+                    production: false
+                    battery: false
+                    circuit_number: 6
+                  - id: 82c275da-942f-486c-9c84-f908d0ee4add
+                    dt_created: '2018-04-25T19:19:35.532341Z'
+                    dt_modified: '2019-07-19T23:29:09.757005Z'
+                    organization: curb
+                    label: Stove
+                    number: 14
+                    circuit_type: consumption
+                    multiplier: 2
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN50
+                    group: 2
+                    channel: 2
+                    grid: false
+                    production: false
+                    battery: false
+                    circuit_number:
+                  - id: 4f42c600-f114-428d-938f-80fc659a08b4
+                    dt_created: '2018-04-25T19:19:35.666843Z'
+                    dt_modified: '2019-07-19T23:29:43.454398Z'
+                    organization: curb
+                    label: Bath Carport Out
+                    number: 15
+                    circuit_type: consumption
+                    multiplier: 1
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN30
+                    group: 3
+                    channel: 0
+                    grid: false
+                    production: false
+                    battery: false
+                    circuit_number: 8
+                  - id: 925e2cc7-4859-45fc-9126-b2f81be8c225
+                    dt_created: '2018-04-25T19:19:35.781764Z'
+                    dt_modified: '2020-10-21T19:08:48.266944Z'
+                    organization: curb
+                    label: PV
+                    number: 16
+                    circuit_type: breaker_side_production
+                    multiplier: 2
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN50
+                    group: 3
+                    channel: 1
+                    grid: false
+                    production: true
+                    battery: false
+                    circuit_number: 5
+                  - id: 138980f0-c74d-4c82-92f9-44f29aa3e122
+                    dt_created: '2018-04-25T19:19:35.888931Z'
+                    dt_modified: '2020-08-27T20:40:43.857489Z'
+                    organization: curb
+                    label: Main B
+                    number: 17
+                    circuit_type: main
+                    multiplier: 1
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN100
+                    group: 3
+                    channel: 2
+                    grid: true
+                    production: false
+                    battery: false
+                    circuit_number: 7
+  /locations/{location_id}/billing:
+    get:
+      summary: Get billing info for a location
+      operationId: getLocationBilling
+      parameters:
+        - in: path
+          name: location_id
+          schema:
+            type: string
+            format: uuid
+          required: true      
+      tags:
+        - Location
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:    
+              schema:
+                type: object
+                $ref: "#/components/schemas/LocationBilling"
+              example:
+                day_of_month: 1
+                dt_created: '2018-04-25T18:38:38.689367Z'
+                dt_modified: '2018-12-31T16:38:03.074348Z'
+                genability_account_id: 1747afc3-d399-45f8-bba4-8b0f98eda69a
+                location: fbd3b186-19f6-40c0-ab65-cd44016543b7
+                simple_currency_code: USD
+                simple_kwh_price: 0.1
+                type: simple
+                tariff:
+                  billingPeriod: "MONTHLY"
+                  currency: "USD"
+                  customerClass: null
+                  customerLikelihood: null
+                  endDate: null
+                  lseId: 1862
+                  lseName: "Tucson Electric Power Co"
+                  masterTariffId: 3196451
+                  tariffCode: "TRREST"
+                  tariffName: "Residential Time-of-Use"
+                  timeZone: "America/Phoenix"
+
+  /locations/{location_id}/historical:
+    get:
+      summary: Get historical samples for a location
+      operationId: getHistoricalForLocation
+      tags:
+        - Historical
+      parameters:
+        - in: path
+          name: location_id
+          schema:
+            type: string
+            format: uuid
+          required: true  
+        - in: query
+          name: resolution
+          schema:
+            type: string
+            enum: [m, 5m, h, d]
+          description: The sample resolution for the query.  These are fixed to the `m` for minutes, `5m` for five minutes, `h` for hours, and `d` for days.
+          required: true
+        - in: query
+          name: from_now_range
+          schema:
+            type: string
+          description: "
+            A shorthand option for describing a date range from the current time.  For example \"3h\" will query for a date range of 3 hours ago to now, \"1mo\" will query from one month (30 days) ago to now.  More on time ranges in our full API docs.
+            \n\n
+            Required if not using `start` and `end` to describe a range."
+        - in: query
+          name: start
+          schema:
+            oneOf:
+              - type: integer
+                format: unix-timestamp
+              - type: string
+                format: date-time
+          description: "
+            A date-time string describing the start of the range to query.  
+            \n\n
+            Historical samples are stored with the timestamp representing the __start__ of the range they are measuring.  For example, an hourly average sample measuring between 10:00am - 11:00am will be tagged with the timestamp of 10am.
+            \n\n
+            Therefore, if you use a `start` query of 10:01am, that will __not__ include the 10:00am - 11:00am averaged sample.
+            \n\n
+            Required if not using `from_now_range`"
+          examples:
+            timestamp: 
+              summary: Using a unix timestamp
+              value: 1638982800
+            dateTime:
+              summary: Using a date time ISO string
+              value: '2021-12-08T17:00:00.000Z'  
+        - in: query
+          name: end
+          schema:
+            oneOf:
+              - type: integer
+                format: unix-timestamp
+              - type: string
+                format: date-time
+          description: "
+            A date-time string describing the end of the range to query.  
+            \n\n
+            Historical samples are stored with the timestamp representing the __start__ of the range they are measuring.  For example, an hourly average sample measuring between 10:00am - 11:00am will be tagged with the timestamp of 10am.
+            \n\n
+            Therefore, if you use an `end` query of 10:00am, that __will__ include the entirety of 10:00am - 11:00am averaged sample.
+            \n\n
+            Required if not using `from_now_range`"
+          examples:
+            timestamp: 
+              summary: Using a unix timestamp
+              value: 1638982800
+            dateTime:
+              summary: Using a date time ISO string
+              value: '2021-12-08T17:00:00.000Z'
+        - in: query
+          name: fill_all_gaps
+          schema:
+            type: boolean
+            default: false
+          allowEmptyValue: true
+          description: "
+            This option tells the API how to handle gaps in the data for the defined range.  If true, this will force the API to return a synthetic time series object for every timestamp in the defined range/resolution.  Some consumers may wish to have some value returned for 100% of the queried range, which is what this parameter does.
+            \n\n
+            Without this parameter, the API will not include any synthetic time series objects for times that we have no data.  However, bear in mind that for locations which have more than one Curb device, it is possible to have \"partial\" gaps, which is when there is data for some hubs and not others for a given timestamp.  These partial gaps will always be filled regardless of if `fill_all_gaps` is true.
+            \n\n
+            This parameter is often used in combination with the `interpolate` parameter to ensure numeric data is returned for every timestamp in the queried range."
+        - in: query
+          name: interpolate
+          schema:
+            type: boolean
+            default: false
+          allowEmptyValue: true
+          description: "
+            This option tells the API what values it should use when creating a synthetic time series object.  Synthetic time series objects are created for \"partial\" gaps (when there is data for some hubs and not others in a multi-hub location for a given timestamp), or when the `fill_all_gaps` parameter above is set to true.
+            \n\n
+            When this parameter is false (as it is by default), all numeric values in synthetic time series objects will be set to `null`.  When this parameter is true, all numeric values in time series objects will be interpolated from nearby real data.
+            \n\n
+            This parameter is often used in combination with the `fill_all_gaps` parameter to ensure numeric data is returned for every timestamp in the queried range."
+      responses: 
+        '200':
+          description: Successful request
+          content:
+            application/json:    
+              schema:
+                type: object
+
+# END PATHS
 components:
   securitySchemes:
     bearerAuth:
@@ -147,53 +835,208 @@ components:
           type: integer
         picture:
           type: string
-          format: url        
-      example:
-        nickname: "test+staging"
-        name: "test+staging@energycurb.com"
-        picture: "https://s.gravatar.com/avatar/af23e57041db34ef2b83c2c8e40b29cf?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fte.png"
-        updated_at: "2021-11-22T22:41:56.756Z"
-        email: "test+staging@energycurb.com"
-        email_verified: false
-        iss: "https://staging-energycurb.auth0.com/"
-        sub: "auth0|5fa1f61691dfd60072b812dc"
-        aud: "BZO5TDNSZ7IOTSNvkkmGlZp34fV9NzRg"
-        iat: 1638487783
-        exp: 1638523783
-        at_hash: "LJuQt8v_wkPtYrupOSot-w"
-        created_at: "2020-11-04T00:30:14.847Z"
-        identities:
-          - user_id: "5fa1f61691dfd60072b812dc"
-            provider: "auth0"
-            connection: "Users"
-            isSocial: false
-        user_id: "auth0|5fa1f61691dfd60072b812dc"
-        last_ip: "136.49.149.11"
-        last_login: "2021-11-22T22:41:56.756Z"
-        logins_count: 32
+          format: url
     Location:
       type: object
       properties: 
         id:
           type: string
           format: uuid
-      example:
-        id: bb2a7430-3143-44b6-9f0d-22890b2c7f92
-        dt_created: 2019-01-28T17:13:49.593389Z
-        dt_modified: 2021-11-22T22:48:13.475634Z
-        organization: curb
-        label: Main house
-        country: "USA"
-        state: "TX"
-        city: "Austin"
-        postcode: "78744"
-        address: "1234 Grey Stone Drive"
-        geocode: "30.19631100,-97.73080700"
-        timezone: "America/Chicago"
+        dt_created: 
+          type: string
+          format: date-time
+        dt_modified: 
+          type: string
+          format: date-time
+        organization: 
+          type: string
+        label: 
+          type: string
+        country: 
+          type: string
+          format: iso3-country-code
+        state: 
+          type: string
+        city: 
+          type: string          
+        postcode: 
+          type: string
+        address: 
+          type: string
+        geocode: 
+          type: string
+          format: geocode
+        timezone: 
+          type: string
+          format: timezone
+      required:
+        - id
+        - dt_created
+        - dt_modified
+    Installation:
+      type: object
+      properties:
+        hub:
+          type: string
+          format: hub-id
+        location:
+          type: string
+          format: uuid
+        fleet:
+          type: string
+        organization:
+          type: string
+        state:
+          type: string
+          enum: [free, in_process, pending, active]
+        label:
+          type: string          
+        dt_claimed: 
+          type: string
+          format: date-time
+        dt_state_changed: 
+          type: string
+          format: date-time
+        dt_created: 
+          type: string
+          format: date-time
+        dt_modified: 
+          type: string
+          format: date-time
+      required:
+        - hub
+        - fleet
+        - state
+        - location
+        - dt_created
+        - dt_modified
+
+    Register:
+      type: object
+      properties:
+        id: 
+          type: string
+          format: uuid
+        dt_created:
+          type: string
+          format: date-time
+        dt_modified: 
+          type: string
+          format: date-time
+        label: 
+          type: string
+        number:
+          type: integer
+        circuit_type: 
+          type: string
+          enum: [main, consumption, other, breaker_side_production, line_side_production, breaker_side_battery, line_side_battery]
+        multiplier:
+          type: integer
+          enum: [1, 2, 3]
+        inverted:
+          type: boolean          
+        installation: 
+          type: string
+          format: hub-id
+        clamp_definition:
+          type: string          
+        group: 
+          type: integer
+        channel: 
+          type: integer
+        grid: 
+          type: boolean
+        production: 
+          type: boolean
+        battery:
+          type: boolean
+        circuit_number:
+          type: integer
+
+    LocationBilling: 
+      type: object
+      properties: 
+        dt_created: 
+          type: string
+          format: date-time
+        dt_modified: 
+          type: string
+          format: date-time
+        day_of_month: 
+          type: integer
+        type:
+          type: string
+          enum: [simple, utility]
+        simple_kwh_price:        
+          type: number
+          format: float
+        location:
+          type: string
+          format: uuid
+        genability_account_id:
+          type: string
+          format: uuid
+        simple_currency_code:
+          type: string
+          format: currency-code
+        tariff: 
+          type: object
+          $ref: "#/components/schemas/Tariff"
+
+    Tariff:
+      type: object
+      properties:
+        billingPeriod: 
+          type: string
+        currency: 
+          type: string
+        customerClass: 
+          type: string
+          nullable: true
+        customerLikelihood: 
+          type: number
+          format: float
+          nullable: true
+        endDate:  
+          type: string
+          format: date-time
+          nullable: true
+        lseId: 
+          type: integer
+        lseName: 
+          type: string
+        masterTariffId: 
+          type: integer
+        tariffCode: 
+          type: string
+        tariffName: 
+          type: string
+        timeZone: 
+          type: string
+          format: timezone
+
     UserAccess: 
       type: object
       properties: 
+        id: 
+          type: string
+          format: uuid
+        user: 
+          type: string
+          format: uuid
         location: 
-          $ref: "#/components/schemas/Location"
+          oneOf: 
+            - type: string
+            - $ref: "#/components/schemas/Location"
           nullable: true
-          
+        installation:
+          oneOf: 
+            - type: string
+            - $ref: "#/components/schemas/Installation"
+          nullable: true
+        fleet:
+          type: string
+          nullable: true
+      required:
+        - id
+        - user
