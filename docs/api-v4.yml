@@ -651,7 +651,7 @@ paths:
             format: uuid
           required: true      
       tags:
-        - Location
+        - Billing
       responses:
         '200':
           description: Successful request
@@ -684,7 +684,8 @@ paths:
 
   /locations/{location_id}/historical:
     get:
-      summary: Get historical samples for a location
+      summary: Get historical samples for a location in a given time range
+      description: This endpoint is used to get time series data for a location
       operationId: getHistoricalForLocation
       tags:
         - Historical
@@ -700,7 +701,7 @@ paths:
           schema:
             type: string
             enum: [m, 5m, h, d]
-          description: The sample resolution for the query.  These are fixed to the `m` for minutes, `5m` for five minutes, `h` for hours, and `d` for days.
+          description: The sample resolution for the query.  These are fixed to the `m` for minutes, `5m` for five minutes, `h` for hours, and `d` for days.  If omitted, the coarsest (largest) resolution that effectively covers the queried range will be used.
           required: true
         - in: query
           name: from_now_range
@@ -757,6 +758,34 @@ paths:
               summary: Using a date time ISO string
               value: '2021-12-08T17:00:00.000Z'
         - in: query
+          name: metric
+          schema:
+            type: string
+            enum: [w, all]
+            default: w
+          description: By default, the only quantitative metric that will be returned is power (watts).  When using "all", the API will return wattage as well as current, voltage, power factor, and total harmonic distortion.
+        - in: query
+          name: include_totals
+          schema:
+            type: boolean
+            default: false
+          allowEmptyValue: true
+          description: When true, this parameter tells the API to include totals in the response.  These totals include `grid_net`, `consuption`, `production`, `battery`.  By default, this value will be false and only the individual registers will be returned.
+        - in: query
+          name: group_by
+          schema:
+            type: string
+            enum: [register, timestamp, category]
+            default: register
+          description: "
+            This parameter determines how the returned data is organized.  The default is \"register\", which is perhaps for consumers who only want to examine a subset of registers, or would like to create a per-register visualization.
+            \n\n
+            There is also \"category\" which is similar, but registers of the same category are grouped together and their values summed.
+            \n\n
+            Using \"timestamp\" will group together all data for a given timestamp.  This is typically the most compact historical data format.
+            \n\n
+            More on these formats in our full API docs"
+        - in: query
           name: fill_all_gaps
           schema:
             type: boolean
@@ -787,6 +816,333 @@ paths:
             application/json:    
               schema:
                 type: object
+
+  /locations/{location_id}/aggregate:
+    get:
+      summary: Get aggregated data for a location in a given time range.
+      description: This endpoint is most commonly used to determine the total energy (kWh) consumed/produced over a given time period.
+      operationId: getAggregateForLocation
+      tags:
+        - Historical
+      parameters:
+        - in: path
+          name: location_id
+          schema:
+            type: string
+            format: uuid
+          required: true  
+        - in: query
+          name: resolution
+          schema:
+            type: string
+            enum: [m, 5m, h, d]
+          description: The sample resolution for the query.  These are fixed to the `m` for minutes, `5m` for five minutes, `h` for hours, and `d` for days.  If omitted, the coarsest (largest) resolution that effectively covers the queried range will be used.
+          required: true
+        - in: query
+          name: from_now_range
+          schema:
+            type: string
+          description: "
+            A shorthand option for describing a date range from the current time.  For example \"3h\" will query for a date range of 3 hours ago to now, \"1mo\" will query from one month (30 days) ago to now.  More on time ranges in our full API docs.
+            \n\n
+            Required if not using `start` and `end` to describe a range."
+        - in: query
+          name: start
+          schema:
+            oneOf:
+              - type: integer
+                format: unix-timestamp
+              - type: string
+                format: date-time
+          description: "
+            A date-time string describing the start of the range to query.  
+            \n\n
+            Historical samples are stored with the timestamp representing the __start__ of the range they are measuring.  For example, an hourly average sample measuring between 10:00am - 11:00am will be tagged with the timestamp of 10am.
+            \n\n
+            Therefore, if you use a `start` query of 10:01am, that will __not__ include the 10:00am - 11:00am averaged sample.
+            \n\n
+            Required if not using `from_now_range`"
+          examples:
+            timestamp: 
+              summary: Using a unix timestamp
+              value: 1638982800
+            dateTime:
+              summary: Using a date time ISO string
+              value: '2021-12-08T17:00:00.000Z'  
+        - in: query
+          name: end
+          schema:
+            oneOf:
+              - type: integer
+                format: unix-timestamp
+              - type: string
+                format: date-time
+          description: "
+            A date-time string describing the end of the range to query.  
+            \n\n
+            Historical samples are stored with the timestamp representing the __start__ of the range they are measuring.  For example, an hourly average sample measuring between 10:00am - 11:00am will be tagged with the timestamp of 10am.
+            \n\n
+            Therefore, if you use an `end` query of 10:00am, that __will__ include the entirety of 10:00am - 11:00am averaged sample.
+            \n\n
+            Required if not using `from_now_range`"
+          examples:
+            timestamp: 
+              summary: Using a unix timestamp
+              value: 1638982800
+            dateTime:
+              summary: Using a date time ISO string
+              value: '2021-12-08T17:00:00.000Z'
+        - in: query
+          name: include_totals
+          schema:
+            type: boolean
+            default: false
+          allowEmptyValue: true
+          description: When true, this parameter tells the API to include totals in the response.  These totals include `grid_net`, `consuption`, `production`, `battery`.  By default, this value will be false and only the individual registers will be returned.
+        - in: query
+          name: group_by
+          schema:
+            type: string
+            enum: [register, category]
+            default: register
+          description: "
+            This parameter determines how the returned data is organized.  The default is \"register\", which is perhaps for consumers who only want to examine a subset of registers, or would like to create a per-register visualization.
+            \n\n
+            There is also \"category\" which is similar, but registers of the same category are grouped together and their values summed.
+            \n\n
+            More on these formats in our full API docs"
+      responses: 
+        '200':
+          description: Successful request
+          content:
+            application/json:    
+              schema:
+                type: object
+
+  /locations/{location_id}/kwh_ranges:
+    get:
+      summary: Get energy (kWh) totals for a flexible tie 
+      description: "
+        This is a convenience endpoint that returns a series of energy (kWh) over a time range grouped in arbitrary band sizes.  For example, a consumer could request 15 minute energy totals for a location in the last 24 hours.  When using band sizes in units of days, the API will automatically determine the start and end of the day based on the location timezone
+        \n\n
+        This endpoint is particularly useful for creating a dataset for kWh bar charts"
+      operationId: getKwhRangesForLocation
+      tags:
+        - Historical
+      parameters:
+        - in: path
+          name: location_id
+          schema:
+            type: string
+            format: uuid
+          required: true  
+        - in: query
+          name: from_now_range
+          schema:
+            type: string
+          description: "
+            A shorthand option for describing a date range from the current time.  For example \"3h\" will query for a date range of 3 hours ago to now, \"1mo\" will query from one month (30 days) ago to now.  More on time ranges in our full API docs.
+            \n\n
+            Required if not using `start` and `end` to describe a range."
+        - in: query
+          name: start
+          schema:
+            oneOf:
+              - type: integer
+                format: unix-timestamp
+              - type: string
+                format: date-time
+          description: "
+            A date-time string describing the start of the range to query.  
+            \n\n
+            Historical samples are stored with the timestamp representing the __start__ of the range they are measuring.  For example, an hourly average sample measuring between 10:00am - 11:00am will be tagged with the timestamp of 10am.
+            \n\n
+            Therefore, if you use a `start` query of 10:01am, that will __not__ include the 10:00am - 11:00am averaged sample.
+            \n\n
+            Required if not using `from_now_range`"
+          examples:
+            timestamp: 
+              summary: Using a unix timestamp
+              value: 1638982800
+            dateTime:
+              summary: Using a date time ISO string
+              value: '2021-12-08T17:00:00.000Z'  
+        - in: query
+          name: end
+          schema:
+            oneOf:
+              - type: integer
+                format: unix-timestamp
+              - type: string
+                format: date-time
+          description: "
+            A date-time string describing the end of the range to query.  
+            \n\n
+            Historical samples are stored with the timestamp representing the __start__ of the range they are measuring.  For example, an hourly average sample measuring between 10:00am - 11:00am will be tagged with the timestamp of 10am.
+            \n\n
+            Therefore, if you use an `end` query of 10:00am, that __will__ include the entirety of 10:00am - 11:00am averaged sample.
+            \n\n
+            Required if not using `from_now_range`"
+          examples:
+            timestamp: 
+              summary: Using a unix timestamp
+              value: 1638982800
+            dateTime:
+              summary: Using a date time ISO string
+              value: '2021-12-08T17:00:00.000Z'
+        - in: query
+          name: band_size
+          schema:
+            type: string
+            default: false
+          required: true
+          description: A range time string defining the band size of each kwh total returned in the range.  For example, if you want 30 min totals for your queried range, use "30m".
+        - in: query
+          name: include_totals
+          schema:
+            type: boolean
+            default: false
+          allowEmptyValue: true
+          description: When true, this parameter tells the API to include totals in the response.  These totals include `grid_net`, `consuption`, `production`, `battery`.  By default, this value will be false and only the individual registers will be returned.
+        - in: query
+          name: group_by
+          schema:
+            type: string
+            enum: [register, category]
+            default: register
+          description: "
+            This parameter determines how the returned data is organized.  The default is \"register\", which is perhaps for consumers who only want to examine a subset of registers, or would like to create a per-register visualization.
+            \n\n
+            There is also \"category\" which is similar, but registers of the same category are grouped together and their values summed.
+            \n\n
+            More on these formats in our full API docs"
+      responses: 
+        '200':
+          description: Successful request
+          content:
+            application/json:    
+              schema:
+                type: object
+
+  /categories:
+    get:
+      summary: Get all register categories
+      operationId: listRegisters
+      tags:
+        - Categories
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /categories/{category_id}:
+    get:
+      summary: Get a register category
+      operationId: getCategory
+      tags:
+        - Categories
+      parameters:
+        - in: path
+          name: category_id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /locations/{location_id}/energy-score:
+    get:
+      summary: Get the energy score for a location.
+      description: By default, it will return the current energy score for the last day, which is precalculated once per day.  If a custom date range is requested, it will make an ad-hoc energy score calculation, which will be slower.
+      operationId: getEnergyScoreForLocation
+      tags:
+        - Energy Score
+      parameters:
+        - in: path
+          name: location_id
+          schema: 
+            type: string
+            format: uuid
+          required: true
+        - in: query
+          name: from_now_range
+          schema:
+            type: string
+          description: A shorthand option for describing a date range from the current time.  For example \"3h\" will query for a date range of 3 hours ago to now, \"1mo\" will query from one month (30 days) ago to now.  More on time ranges in our full API docs.
+        - in: query
+          name: start
+          schema:
+            oneOf:
+              - type: integer
+                format: unix-timestamp
+              - type: string
+                format: date-time
+          description: A date-time string describing the start of the range to query.
+          examples:
+            timestamp: 
+              summary: Using a unix timestamp
+              value: 1638982800
+            dateTime:
+              summary: Using a date time ISO string
+              value: '2021-12-08T17:00:00.000Z'  
+        - in: query
+          name: end
+          schema:
+            oneOf:
+              - type: integer
+                format: unix-timestamp
+              - type: string
+                format: date-time
+          description: A date-time string describing the end of the range to query.
+          examples:
+            timestamp: 
+              summary: Using a unix timestamp
+              value: 1638982800
+            dateTime:
+              summary: Using a date time ISO string
+              value: '2021-12-08T17:00:00.000Z'
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /locations/{location_id}/bill_estimation:
+    get:
+      summary: Estimate the current/projected bill for a given location
+      operationId: getBillEstimationForLocation
+      tags:
+        - Billing
+      parameters:
+        - in: path
+          name: location_id
+          schema: 
+            type: string
+            format: uuid
+          required: true
+        - in: query
+          name: projected
+          schema:
+            type: boolean
+          allowEmptyValue: true
+          description: If true, this parameter will estimate the current bill through the end of the current billing cycle.  It will use the current known usage of the current billing cycle to create this calculation.
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                type: object                
 
 # END PATHS
 components:
@@ -952,6 +1308,22 @@ components:
           type: boolean
         circuit_number:
           type: integer
+      required:
+        - id
+        - dt_created
+        - dt_modified
+        - number
+        - circuit_type
+        - multiplier
+        - inverted
+        - installation
+        - clamp_definition
+        - group
+        - channel
+        - grid
+        - production
+        - battery
+        - circuit_number
 
     LocationBilling: 
       type: object
