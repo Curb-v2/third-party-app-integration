@@ -261,7 +261,7 @@ __y__ | years
 
 The __`rangeId`__ parameter is a string representing the amount of time back from the present moment that you would like to query.  It must contain a magnitude and a unit value.  For example, to query the last 30 seconds, your rangeId would be `30s`.  To query the last 6 weeks, the rangeId would be `6w`.
 
-The __`resolution`__ parameter specifies what level of data resolution you would like for you response.  Note that large ranges and smaller resolutions will result in slower requests.  `s`, `m`, `5m`, and `h` are the only allowed resolution values.
+The __`resolution`__ parameter specifies what level of data resolution you would like for you response.  Note that large ranges and smaller resolutions will result in slower requests.  `m`, `5m`, `h`, and `d` are the only allowed resolution values.
 
 * __GET__ `/api/v3/historical/:locationId/:rangeId/:resolution` - Get historical data for all circuits in the given locationId, rangeId, and resolution.  Response will be a JSON array, with one item for each circuit, and each circuit contains a `values` array with averaged samples that have a timestamp and a value in Watt-hours.
   * Example response for `/api/v3/historical/locationId/5m/m`:
