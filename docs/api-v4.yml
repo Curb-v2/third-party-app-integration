@@ -2,12 +2,12 @@
 
 openapi: "3.0.0"
 info:
-  version: 1.0.0
-  title: Curb Public API V4
+  version: 4.0.0.alpha
+  title: Curb API
   description: "
-    This API is for Curb end-users or for developers looking to build an end-user facing application.  Authentication is performed via Auth0.  Once you have an access token, you can interact with this API clicking the \"Authorize\" button below.
+    This API is designed both for Curb end-users or for developers looking to build an end-user facing application, as well as for our partner fleet organizations.  Authentication is performed via Auth0.  Once you have an access token, you can interact with this API clicking the \"Authorize\" button below.
     \n\n
-    If you are looking for realtime data, that is documented separately"
+    If you are looking for realtime data, that is documented separately."
   license:
     name: MIT
 servers:
@@ -134,7 +134,7 @@ paths:
       summary: List locations to which the given user has access
       operationId: listLocationsForUser
       tags:
-        - Location
+        - Configuration
       parameters:
         - in: query
           name: page_size
@@ -189,7 +189,7 @@ paths:
             format: uuid
           required: true
       tags:
-        - Location
+        - Configuration
       responses:
         '200':
           description: Successful request
@@ -222,13 +222,15 @@ paths:
             format: uuid
           required: true      
       tags:
-        - Location
+        - Configuration
       requestBody:
         required: true
         content:
-          application/json:
+          application/json:            
             schema:
               $ref: '#/components/schemas/Location'
+            example:
+              label: Guest house
       responses:
         '200':
           description: Successful request
@@ -260,7 +262,7 @@ paths:
             format: uuid
           required: true      
       tags:
-        - Location
+        - Configuration
       responses:
         '200':
           description: Successful request
@@ -307,7 +309,7 @@ paths:
             format: uuid
           required: true      
       tags:
-        - Location
+        - Configuration
       responses:
         '200':
           description: Successful request
