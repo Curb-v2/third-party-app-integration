@@ -11,7 +11,6 @@ info:
   license:
     name: MIT
 servers:
-  - url: https://app.energycurb.com/api/v4
   - url: https://app.staging.energycurb.com/api/v4
 security:
   - bearerAuth: []
@@ -641,6 +640,7 @@ paths:
                     production: false
                     battery: false
                     circuit_number: 7
+  
   /locations/{location_id}/billing:
     get:
       summary: Get billing info for a location
@@ -687,7 +687,13 @@ paths:
   /locations/{location_id}/historical:
     get:
       summary: Get historical samples for a location in a given time range
-      description: This endpoint is used to get time series data for a location
+      description: "This endpoint is used to get time series data for a location.
+        \n\n
+        You must define a query range by using either `from_now_range` or both the `start` and `end` query parameters.  More on how to define that range [here](https://github.com/Curb-v2/third-party-app-integration#curb-integrations).
+        \n\n
+        The response schema can vary greatly depending on the `group_by` query parameter.  The default value is `timestamp` which groups all readings together
+        \n\n
+        "
       operationId: getHistoricalForLocation
       tags:
         - Historical
@@ -704,7 +710,6 @@ paths:
             type: string
             enum: [m, 5m, h, d]
           description: The sample resolution for the query.  These are fixed to the `m` for minutes, `5m` for five minutes, `h` for hours, and `d` for days.  If omitted, the coarsest (largest) resolution that effectively covers the queried range will be used.
-          required: true
         - in: query
           name: from_now_range
           schema:
@@ -763,16 +768,16 @@ paths:
           name: metric
           schema:
             type: string
-            enum: [w, all]
+            enum: [w, i, cost_30d, "w,cost_30d"]
             default: w
-          description: By default, the only quantitative metric that will be returned is power (watts).  When using "all", the API will return wattage as well as current, voltage, power factor, and total harmonic distortion.
+          description: By default, the only quantitative metric that will be returned is power (watts).  You can also query "i" to query current (amps), and `cost_30d` which will use the location's utility information to compute a 30d cost for a given power usage.  You can specify multiple metrics by comma-separating the different values (eg. "w,cost_30d")
         - in: query
           name: include_totals
           schema:
             type: boolean
             default: false
           allowEmptyValue: true
-          description: When true, this parameter tells the API to include totals in the response.  These totals include `grid_net`, `consuption`, `production`, `battery`.  By default, this value will be false and only the individual registers will be returned.
+          description: When true, this parameter tells the API to include totals in the response.  These totals include `net` (net grid impact) and `cons` (consuption), and possibly `prod` (production) and `batt` (battery) if those services are enabled at the location.
         - in: query
           name: group_by
           schema:
@@ -811,13 +816,630 @@ paths:
             When this parameter is false (as it is by default), all numeric values in synthetic time series objects will be set to `null`.  When this parameter is true, all numeric values in time series objects will be interpolated from nearby real data.
             \n\n
             This parameter is often used in combination with the `fill_all_gaps` parameter to ensure numeric data is returned for every timestamp in the queried range."
+        - in: query
+          name: omit_registers
+          schema:
+            type: boolean
+            default: false
+          allowEmptyValue: true
+          description: Set to true in order to omit the \"registers\" array from the response.  This can significantly reduce the response size.
+        - in: query
+          name: omit_units
+          schema:
+            type: boolean
+            default: false
+          allowEmptyValue: true
+          description: Set to true in order to omit the \"units\" array from the response."
       responses: 
         '200':
           description: Successful request
           content:
             application/json:    
-              schema:
-                type: object
+              examples:
+                group_by=timestamp:
+                  value:
+                    count: 3
+                    real_samples_count: 3
+                    synthetic_samples_count: 0
+                    start: 1639936800
+                    end: 1639937699
+                    resolution: 5m
+                    hubs:
+                    - crhs5ma2
+                    units:
+                    - key: w
+                      name: real power
+                      unit: W
+                    registers:
+                    - id: 834a9909-f367-4987-9601-725d705d6dd8
+                      label: Main A Phase
+                      group: 0
+                      channel: 0
+                      grid: true
+                      production: false
+                      battery: false
+                    - id: 3ab156f8-d5b2-4587-963b-dd21cb9a1da5
+                      label: Solar A Phase
+                      group: 0
+                      channel: 1
+                      grid: false
+                      production: true
+                      battery: false
+                    - id: a7d66f16-79d0-46aa-b4f9-33095dfc1586
+                      label:
+                      group: 0
+                      channel: 2
+                      grid: false
+                      production: false
+                      battery: false
+                    - id: 36787ec9-dbbd-49cc-ae78-dbbf0f5308e4
+                      label: HVAC compressor
+                      group: 0
+                      channel: 3
+                      grid: false
+                      production: false
+                      battery: false
+                    - id: e4f10942-47bb-4894-84c5-04666fc8cab7
+                      label:
+                      group: 0
+                      channel: 4
+                      grid: false
+                      production: false
+                      battery: false
+                    - id: 939f08bd-f3c7-4e7f-a8b2-f63d8c3ecaed
+                      label:
+                      group: 0
+                      channel: 5
+                      grid: false
+                      production: false
+                      battery: false
+                    - id: 80fed2bc-840f-4395-8dca-585523884953
+                      label: Main B Phase
+                      group: 1
+                      channel: 0
+                      grid: true
+                      production: false
+                      battery: false
+                    - id: b4260e18-66a5-4cf8-bece-5b50e23ef4b3
+                      label: Solar B Phase
+                      group: 1
+                      channel: 1
+                      grid: false
+                      production: true
+                      battery: false
+                    - id: cb104ac5-3ddd-4b14-8153-3e8475bc7672
+                      label:
+                      group: 1
+                      channel: 2
+                      grid: false
+                      production: false
+                      battery: false
+                    - id: ec2158d7-8085-4aac-96c9-a939b5c5c8ca
+                      label:
+                      group: 1
+                      channel: 3
+                      grid: false
+                      production: false
+                      battery: false
+                    - id: 45ab969e-0457-4e06-8bd5-df8ad8a634d9
+                      label:
+                      group: 1
+                      channel: 4
+                      grid: false
+                      production: false
+                      battery: false
+                    - id: 49e1624a-ce44-4fa8-8ce7-26ea6b57a6eb
+                      label:
+                      group: 1
+                      channel: 5
+                      grid: false
+                      production: false
+                      battery: false
+                    - id: ea626128-24b5-458a-b3ab-348eb2024c86
+                      label:
+                      group: 2
+                      channel: 0
+                      grid: false
+                      production: false
+                      battery: false
+                    - id: 7cfe8a54-cfdf-43f0-93b2-6bb6f4b55254
+                      label:
+                      group: 2
+                      channel: 1
+                      grid: false
+                      production: false
+                      battery: false
+                    - id: 03021d86-0dc3-4b5d-a3dc-537949127b3c
+                      label:
+                      group: 2
+                      channel: 2
+                      grid: false
+                      production: false
+                      battery: false
+                    - id: 29f0239f-c53a-4ebe-8641-861c13ed15b1
+                      label:
+                      group: 3
+                      channel: 0
+                      grid: false
+                      production: false
+                      battery: false
+                    - id: 75659e6f-2767-4bfe-ba94-3e0f2d58ec0b
+                      label:
+                      group: 3
+                      channel: 1
+                      grid: false
+                      production: false
+                      battery: false
+                    - id: dbd87692-f0d4-48be-8086-e8fe11ca79a6
+                      label:
+                      group: 3
+                      channel: 2
+                      grid: false
+                      production: false
+                      battery: false
+                    - id: __OTHER__
+                      label: Other
+                      grid: false
+                      production: false
+                      battery: false
+                      other: true
+                    results:
+                    - t: 1639936800
+                      r:
+                        w:
+                        - -529
+                        - -666
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - -569
+                        - -673
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 241
+                      tot:
+                        net:
+                          w: -1098
+                        cons:
+                          w: 241
+                        prod:
+                          w: -1339
+                    - t: 1639937100
+                      r:
+                        w:
+                        - -508
+                        - -684
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - -583
+                        - -691
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 284
+                      tot:
+                        net:
+                          w: -1091
+                        cons:
+                          w: 284
+                        prod:
+                          w: -1375
+                    - t: 1639937400
+                      r:
+                        w:
+                        - -461
+                        - -792
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - -691
+                        - -796
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 436
+                      tot:
+                        net:
+                          w: -1152
+                        cons:
+                          w: 436
+                        prod:
+                          w: -1588
+                group_by=register:
+                  value:
+                    count: 3
+                    real_samples_count: 3
+                    synthetic_samples_count: 0
+                    start: 1639936800
+                    end: 1639937699
+                    resolution: 5m
+                    hubs:
+                    - crhs5ma2
+                    units:
+                    - key: w
+                      name: real power
+                      unit: W
+                    results:
+                      registers:
+                      - register:
+                          id: 834a9909-f367-4987-9601-725d705d6dd8
+                          label: Main A Phase
+                          group: 0
+                          channel: 0
+                          grid: true
+                          production: false
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - -529
+                          - - 1639937100
+                            - -508
+                          - - 1639937400
+                            - -461
+                      - register:
+                          id: 3ab156f8-d5b2-4587-963b-dd21cb9a1da5
+                          label: Solar A Phase
+                          group: 0
+                          channel: 1
+                          grid: false
+                          production: true
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - -666
+                          - - 1639937100
+                            - -684
+                          - - 1639937400
+                            - -792
+                      - register:
+                          id: a7d66f16-79d0-46aa-b4f9-33095dfc1586
+                          label:
+                          group: 0
+                          channel: 2
+                          grid: false
+                          production: false
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - 0
+                          - - 1639937100
+                            - 0
+                          - - 1639937400
+                            - 0
+                      - register:
+                          id: 36787ec9-dbbd-49cc-ae78-dbbf0f5308e4
+                          label: HVAC compressor
+                          group: 0
+                          channel: 3
+                          grid: false
+                          production: false
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - 0
+                          - - 1639937100
+                            - 0
+                          - - 1639937400
+                            - 0
+                      - register:
+                          id: e4f10942-47bb-4894-84c5-04666fc8cab7
+                          label:
+                          group: 0
+                          channel: 4
+                          grid: false
+                          production: false
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - 0
+                          - - 1639937100
+                            - 0
+                          - - 1639937400
+                            - 0
+                      - register:
+                          id: 939f08bd-f3c7-4e7f-a8b2-f63d8c3ecaed
+                          label:
+                          group: 0
+                          channel: 5
+                          grid: false
+                          production: false
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - 0
+                          - - 1639937100
+                            - 0
+                          - - 1639937400
+                            - 0
+                      - register:
+                          id: 80fed2bc-840f-4395-8dca-585523884953
+                          label: Main B Phase
+                          group: 1
+                          channel: 0
+                          grid: true
+                          production: false
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - -569
+                          - - 1639937100
+                            - -583
+                          - - 1639937400
+                            - -691
+                      - register:
+                          id: b4260e18-66a5-4cf8-bece-5b50e23ef4b3
+                          label: Solar B Phase
+                          group: 1
+                          channel: 1
+                          grid: false
+                          production: true
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - -673
+                          - - 1639937100
+                            - -691
+                          - - 1639937400
+                            - -796
+                      - register:
+                          id: cb104ac5-3ddd-4b14-8153-3e8475bc7672
+                          label:
+                          group: 1
+                          channel: 2
+                          grid: false
+                          production: false
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - 0
+                          - - 1639937100
+                            - 0
+                          - - 1639937400
+                            - 0
+                      - register:
+                          id: ec2158d7-8085-4aac-96c9-a939b5c5c8ca
+                          label:
+                          group: 1
+                          channel: 3
+                          grid: false
+                          production: false
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - 0
+                          - - 1639937100
+                            - 0
+                          - - 1639937400
+                            - 0
+                      - register:
+                          id: 45ab969e-0457-4e06-8bd5-df8ad8a634d9
+                          label:
+                          group: 1
+                          channel: 4
+                          grid: false
+                          production: false
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - 0
+                          - - 1639937100
+                            - 0
+                          - - 1639937400
+                            - 0
+                      - register:
+                          id: 49e1624a-ce44-4fa8-8ce7-26ea6b57a6eb
+                          label:
+                          group: 1
+                          channel: 5
+                          grid: false
+                          production: false
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - 0
+                          - - 1639937100
+                            - 0
+                          - - 1639937400
+                            - 0
+                      - register:
+                          id: ea626128-24b5-458a-b3ab-348eb2024c86
+                          label:
+                          group: 2
+                          channel: 0
+                          grid: false
+                          production: false
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - 0
+                          - - 1639937100
+                            - 0
+                          - - 1639937400
+                            - 0
+                      - register:
+                          id: 7cfe8a54-cfdf-43f0-93b2-6bb6f4b55254
+                          label:
+                          group: 2
+                          channel: 1
+                          grid: false
+                          production: false
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - 0
+                          - - 1639937100
+                            - 0
+                          - - 1639937400
+                            - 0
+                      - register:
+                          id: 03021d86-0dc3-4b5d-a3dc-537949127b3c
+                          label:
+                          group: 2
+                          channel: 2
+                          grid: false
+                          production: false
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - 0
+                          - - 1639937100
+                            - 0
+                          - - 1639937400
+                            - 0
+                      - register:
+                          id: 29f0239f-c53a-4ebe-8641-861c13ed15b1
+                          label:
+                          group: 3
+                          channel: 0
+                          grid: false
+                          production: false
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - 0
+                          - - 1639937100
+                            - 0
+                          - - 1639937400
+                            - 0
+                      - register:
+                          id: 75659e6f-2767-4bfe-ba94-3e0f2d58ec0b
+                          label:
+                          group: 3
+                          channel: 1
+                          grid: false
+                          production: false
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - 0
+                          - - 1639937100
+                            - 0
+                          - - 1639937400
+                            - 0
+                      - register:
+                          id: dbd87692-f0d4-48be-8086-e8fe11ca79a6
+                          label:
+                          group: 3
+                          channel: 2
+                          grid: false
+                          production: false
+                          battery: false
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - 0
+                          - - 1639937100
+                            - 0
+                          - - 1639937400
+                            - 0
+                      - register:
+                          id: __OTHER__
+                          label: Other
+                          grid: false
+                          production: false
+                          battery: false
+                          other: true
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - 241
+                          - - 1639937100
+                            - 284
+                          - - 1639937400
+                            - 436
+                      totals:
+                      - type: net
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - -1098
+                          - - 1639937100
+                            - -1091
+                          - - 1639937400
+                            - -1152
+                      - type: cons
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - 241
+                          - - 1639937100
+                            - 284
+                          - - 1639937400
+                            - 436
+                      - type: prod
+                        values:
+                        - unit: w
+                          series:
+                          - - 1639936800
+                            - -1339
+                          - - 1639937100
+                            - -1375
+                          - - 1639937400
+                            - -1588
 
   /locations/{location_id}/aggregate:
     get:
@@ -921,230 +1543,264 @@ paths:
               schema:
                 type: object
 
-  /locations/{location_id}/kwh_ranges:
-    get:
-      summary: Get energy (kWh) totals for a flexible tie 
-      description: "
-        This is a convenience endpoint that returns a series of energy (kWh) over a time range grouped in arbitrary band sizes.  For example, a consumer could request 15 minute energy totals for a location in the last 24 hours.  When using band sizes in units of days, the API will automatically determine the start and end of the day based on the location timezone
-        \n\n
-        This endpoint is particularly useful for creating a dataset for kWh bar charts"
-      operationId: getKwhRangesForLocation
-      tags:
-        - Historical
-      parameters:
-        - in: path
-          name: location_id
-          schema:
-            type: string
-            format: uuid
-          required: true  
-        - in: query
-          name: from_now_range
-          schema:
-            type: string
-          description: "
-            A shorthand option for describing a date range from the current time.  For example \"3h\" will query for a date range of 3 hours ago to now, \"1mo\" will query from one month (30 days) ago to now.  More on time ranges in our full API docs.
-            \n\n
-            Required if not using `start` and `end` to describe a range."
-        - in: query
-          name: start
-          schema:
-            oneOf:
-              - type: integer
-                format: unix-timestamp
-              - type: string
-                format: date-time
-          description: "
-            A date-time string describing the start of the range to query.  
-            \n\n
-            Historical samples are stored with the timestamp representing the __start__ of the range they are measuring.  For example, an hourly average sample measuring between 10:00am - 11:00am will be tagged with the timestamp of 10am.
-            \n\n
-            Therefore, if you use a `start` query of 10:01am, that will __not__ include the 10:00am - 11:00am averaged sample.
-            \n\n
-            Required if not using `from_now_range`"
-          examples:
-            timestamp: 
-              summary: Using a unix timestamp
-              value: 1638982800
-            dateTime:
-              summary: Using a date time ISO string
-              value: '2021-12-08T17:00:00.000Z'  
-        - in: query
-          name: end
-          schema:
-            oneOf:
-              - type: integer
-                format: unix-timestamp
-              - type: string
-                format: date-time
-          description: "
-            A date-time string describing the end of the range to query.  
-            \n\n
-            Historical samples are stored with the timestamp representing the __start__ of the range they are measuring.  For example, an hourly average sample measuring between 10:00am - 11:00am will be tagged with the timestamp of 10am.
-            \n\n
-            Therefore, if you use an `end` query of 10:00am, that __will__ include the entirety of 10:00am - 11:00am averaged sample.
-            \n\n
-            Required if not using `from_now_range`"
-          examples:
-            timestamp: 
-              summary: Using a unix timestamp
-              value: 1638982800
-            dateTime:
-              summary: Using a date time ISO string
-              value: '2021-12-08T17:00:00.000Z'
-        - in: query
-          name: band_size
-          schema:
-            type: string
-            default: false
-          required: true
-          description: A range time string defining the band size of each kwh total returned in the range.  For example, if you want 30 min totals for your queried range, use "30m".
-        - in: query
-          name: include_totals
-          schema:
-            type: boolean
-            default: false
-          allowEmptyValue: true
-          description: When true, this parameter tells the API to include totals in the response.  These totals include `grid_net`, `consuption`, `production`, `battery`.  By default, this value will be false and only the individual registers will be returned.
-        - in: query
-          name: group_by
-          schema:
-            type: string
-            enum: [register, category]
-            default: register
-          description: "
-            This parameter determines how the returned data is organized.  The default is \"register\", which is perhaps for consumers who only want to examine a subset of registers, or would like to create a per-register visualization.
-            \n\n
-            There is also \"category\" which is similar, but registers of the same category are grouped together and their values summed.
-            \n\n
-            More on these formats in our full API docs"
-      responses: 
-        '200':
-          description: Successful request
-          content:
-            application/json:    
-              schema:
-                type: object
+  # /locations/{location_id}/kwh_ranges:
+  #   get:
+  #     summary: Get energy (kWh) totals for a flexible tie 
+  #     description: "
+  #       This is a convenience endpoint that returns a series of energy (kWh) over a time range grouped in arbitrary band sizes.  For example, a consumer could request 15 minute energy totals for a location in the last 24 hours.  When using band sizes in units of days, the API will automatically determine the start and end of the day based on the location timezone
+  #       \n\n
+  #       This endpoint is particularly useful for creating a dataset for kWh bar charts"
+  #     operationId: getKwhRangesForLocation
+  #     tags:
+  #       - Historical
+  #     parameters:
+  #       - in: path
+  #         name: location_id
+  #         schema:
+  #           type: string
+  #           format: uuid
+  #         required: true  
+  #       - in: query
+  #         name: from_now_range
+  #         schema:
+  #           type: string
+  #         description: "
+  #           A shorthand option for describing a date range from the current time.  For example \"3h\" will query for a date range of 3 hours ago to now, \"1mo\" will query from one month (30 days) ago to now.  More on time ranges in our full API docs.
+  #           \n\n
+  #           Required if not using `start` and `end` to describe a range."
+  #       - in: query
+  #         name: start
+  #         schema:
+  #           oneOf:
+  #             - type: integer
+  #               format: unix-timestamp
+  #             - type: string
+  #               format: date-time
+  #         description: "
+  #           A date-time string describing the start of the range to query.  
+  #           \n\n
+  #           Historical samples are stored with the timestamp representing the __start__ of the range they are measuring.  For example, an hourly average sample measuring between 10:00am - 11:00am will be tagged with the timestamp of 10am.
+  #           \n\n
+  #           Therefore, if you use a `start` query of 10:01am, that will __not__ include the 10:00am - 11:00am averaged sample.
+  #           \n\n
+  #           Required if not using `from_now_range`"
+  #         examples:
+  #           timestamp: 
+  #             summary: Using a unix timestamp
+  #             value: 1638982800
+  #           dateTime:
+  #             summary: Using a date time ISO string
+  #             value: '2021-12-08T17:00:00.000Z'  
+  #       - in: query
+  #         name: end
+  #         schema:
+  #           oneOf:
+  #             - type: integer
+  #               format: unix-timestamp
+  #             - type: string
+  #               format: date-time
+  #         description: "
+  #           A date-time string describing the end of the range to query.  
+  #           \n\n
+  #           Historical samples are stored with the timestamp representing the __start__ of the range they are measuring.  For example, an hourly average sample measuring between 10:00am - 11:00am will be tagged with the timestamp of 10am.
+  #           \n\n
+  #           Therefore, if you use an `end` query of 10:00am, that __will__ include the entirety of 10:00am - 11:00am averaged sample.
+  #           \n\n
+  #           Required if not using `from_now_range`"
+  #         examples:
+  #           timestamp: 
+  #             summary: Using a unix timestamp
+  #             value: 1638982800
+  #           dateTime:
+  #             summary: Using a date time ISO string
+  #             value: '2021-12-08T17:00:00.000Z'
+  #       - in: query
+  #         name: band_size
+  #         schema:
+  #           type: string
+  #           default: false
+  #         required: true
+  #         description: A range time string defining the band size of each kwh total returned in the range.  For example, if you want 30 min totals for your queried range, use "30m".
+  #       - in: query
+  #         name: include_totals
+  #         schema:
+  #           type: boolean
+  #           default: false
+  #         allowEmptyValue: true
+  #         description: When true, this parameter tells the API to include totals in the response.  These totals include `grid_net`, `consuption`, `production`, `battery`.  By default, this value will be false and only the individual registers will be returned.
+  #       - in: query
+  #         name: group_by
+  #         schema:
+  #           type: string
+  #           enum: [register, category]
+  #           default: register
+  #         description: "
+  #           This parameter determines how the returned data is organized.  The default is \"register\", which is perhaps for consumers who only want to examine a subset of registers, or would like to create a per-register visualization.
+  #           \n\n
+  #           There is also \"category\" which is similar, but registers of the same category are grouped together and their values summed.
+  #           \n\n
+  #           More on these formats in our full API docs"
+  #     responses: 
+  #       '200':
+  #         description: Successful request
+  #         content:
+  #           application/json:    
+  #             schema:
+  #               type: object
 
-  /categories:
-    get:
-      summary: Get all register categories
-      operationId: listRegisters
-      tags:
-        - Categories
-      responses:
-        '200':
-          description: Successful request
-          content:
-            application/json:
-              schema:
-                type: object
+  # /categories:
+  #   get:
+  #     summary: Get all register categories
+  #     operationId: listRegisters
+  #     tags:
+  #       - Categories
+  #     responses:
+  #       '200':
+  #         description: Successful request
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
 
-  /categories/{category_id}:
-    get:
-      summary: Get a register category
-      operationId: getCategory
-      tags:
-        - Categories
-      parameters:
-        - in: path
-          name: category_id
-          schema:
-            type: string
-          required: true
-      responses:
-        '200':
-          description: Successful request
-          content:
-            application/json:
-              schema:
-                type: object
+  # /categories/{category_id}:
+  #   get:
+  #     summary: Get a register category
+  #     operationId: getCategory
+  #     tags:
+  #       - Categories
+  #     parameters:
+  #       - in: path
+  #         name: category_id
+  #         schema:
+  #           type: string
+  #         required: true
+  #     responses:
+  #       '200':
+  #         description: Successful request
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
 
   /locations/{location_id}/energy-score:
     get:
       summary: Get the energy score for a location.
-      description: By default, it will return the current energy score for the last day, which is precalculated once per day.  If a custom date range is requested, it will make an ad-hoc energy score calculation, which will be slower.
       operationId: getEnergyScoreForLocation
       tags:
         - Energy Score
-      parameters:
-        - in: path
-          name: location_id
-          schema: 
-            type: string
-            format: uuid
-          required: true
-        - in: query
-          name: from_now_range
-          schema:
-            type: string
-          description: A shorthand option for describing a date range from the current time.  For example \"3h\" will query for a date range of 3 hours ago to now, \"1mo\" will query from one month (30 days) ago to now.  More on time ranges in our full API docs.
-        - in: query
-          name: start
-          schema:
-            oneOf:
-              - type: integer
-                format: unix-timestamp
-              - type: string
-                format: date-time
-          description: A date-time string describing the start of the range to query.
-          examples:
-            timestamp: 
-              summary: Using a unix timestamp
-              value: 1638982800
-            dateTime:
-              summary: Using a date time ISO string
-              value: '2021-12-08T17:00:00.000Z'  
-        - in: query
-          name: end
-          schema:
-            oneOf:
-              - type: integer
-                format: unix-timestamp
-              - type: string
-                format: date-time
-          description: A date-time string describing the end of the range to query.
-          examples:
-            timestamp: 
-              summary: Using a unix timestamp
-              value: 1638982800
-            dateTime:
-              summary: Using a date time ISO string
-              value: '2021-12-08T17:00:00.000Z'
       responses:
         '200':
           description: Successful request
           content:
             application/json:
-              schema:
-                type: object
+              example:
+                location: bb2a7430-3143-44b6-9f0d-22890b2c7f92
+                current_score:
+                  dt_created: '2021-12-20T07:35:25.876Z'
+                  start: '2021-12-20T06:00:00.000Z'
+                  end: '2021-12-21T05:59:59.999Z'
+                  overall: 59.4017
+                  heating_cooling: 43.8586
+                  behavioral: 44.0542
+                previous_score:
+                  dt_created: '2021-12-19T07:35:25.876Z'
+                  start: '2021-12-19T06:00:00.000Z'
+                  end: '2021-12-20T05:59:59.999Z'
+                  overall: 78.1062
+                  heating_cooling: 74.7075
+                  behavioral: 66.6009
+              
 
-  /locations/{location_id}/bill_estimation:
+  /locations/{location_id}/bill-estimation:
     get:
       summary: Estimate the current/projected bill for a given location
+      description: This endpoint runs a cost calculation based on the current usage in the billing period and the designated utility plan.  The billing start date is defined on the LocationBilling
       operationId: getBillEstimationForLocation
       tags:
         - Billing
-      parameters:
-        - in: path
-          name: location_id
-          schema: 
-            type: string
-            format: uuid
-          required: true
-        - in: query
-          name: projected
-          schema:
-            type: boolean
-          allowEmptyValue: true
-          description: If true, this parameter will estimate the current bill through the end of the current billing cycle.  It will use the current known usage of the current billing cycle to create this calculation.
       responses:
         '200':
           description: Successful request
           content:
             application/json:
-              schema:
-                type: object                
+              example:
+                calculatedCostId: 83f650ff-54ee-495d-9033-8a96e4967d83
+                masterTariffId: 80693
+                tariffName: Residential
+                totalCost: 8.1
+                fromDateTime: '2021-12-01T00:00:00-06:00'
+                toDateTime: '2021-12-19T21:00:00-06:00'
+                currency: USD
+                summary:
+                  subTotalCost: 7.72
+                  taxCost: 0.38
+                  totalCost: 8.1
+                  adjustedTotalCost: 8.1
+                  kWh: 21.99
+                  kW: 0.84
+                  SOLAR_PV:
+                    systemSize: 15
+                accuracy: 100
+                items:
+                - fromDateTime: '2021-12-01T00:00:00-06:00'
+                  toDateTime: '2022-01-01T00:00:00-06:00'
+                  quantityKey: fixed
+                  rateAmount: 6.08870968
+                  itemQuantity: 1
+                  cost: 6.08870968
+                  chargeType: FIXED_PRICE
+                - fromDateTime: '2021-12-01T00:00:00-06:00'
+                  toDateTime: '2022-01-01T00:00:00-06:00'
+                  quantityKey: consumption
+                  rateAmount: 0.074
+                  itemQuantity: 21.989
+                  cost: 1.627186
+                  chargeType: CONSUMPTION_BASED
+                - fromDateTime: '2021-12-01T00:00:00-06:00'
+                  toDateTime: '2022-01-01T00:00:00-06:00'
+                  quantityKey: quantity
+                  rateAmount: -0.05906048
+                  itemQuantity: 0
+                  cost: 0
+                  chargeType: QUANTITY
+                - fromDateTime: '2021-12-01T00:00:00-06:00'
+                  toDateTime: '2022-01-01T00:00:00-06:00'
+                  quantityKey: tax
+                  rateAmount: 0.05
+                  itemQuantity: 7.71589568
+                  cost: 0.38579478
+                  chargeType: TAX
+                assumptions:
+                - keyName: tariffId
+                  dataType: INTEGER
+                  fromDateTime: '2021-12-01T00:00:00-06:00'
+                  toDateTime: '2021-12-19T21:00:00-06:00'
+                  dataValue: '3395617'
+                - keyName: cityLimits
+                  displayName: Service Area (Inside/outside city limits)
+                  description: Has service inside or outside city limits
+                  dataType: STRING
+                  fromDateTime: '2021-12-01T00:00:00-06:00'
+                  toDateTime: '2021-12-19T21:00:00-06:00'
+                  dataValue: Inside
+                  accuracy: 80
+                - keyName: solarSystemOutput
+                  displayName: Solar System Output (kWh)
+                  description: Solar System Output (kWh)
+                  dataType: DECIMAL
+                  fromDateTime: '2021-12-01T00:00:00-06:00'
+                  toDateTime: '2021-12-19T21:00:00-06:00'
+                  dataValue: '0'
+                  accuracy: 80
+                - keyName: systemSize
+                  displayName: System Size
+                  description: Nameplate capacity (kW).
+                  dataType: DECIMAL
+                  fromDateTime: '2021-12-01T00:00:00-06:00'
+                  toDateTime: '2021-12-19T21:00:00-06:00'
+                  dataValue: '15'
+                  accuracy: 100
+
 
 # END PATHS
 components:
@@ -1414,3 +2070,141 @@ components:
       required:
         - id
         - user
+
+    UnitDefinition:
+      type: object
+      properties:
+        key:
+          type: string
+        name:
+          type: string
+        unit:
+          type: string
+      required:
+        - key
+        - name
+        - unit
+
+    HistoricalTimeSeriesResponse:
+      type: object
+      properties:
+        count: 
+          type: integer        
+        real_samples_count: 
+          type: integer
+        synthetic_samples_count: 
+          type: integer
+        start: 
+          type: integer
+          format: Unix timestamp
+        end: 
+          type: integer
+          format: Unix-timestamp
+        resolution: 
+          type: string
+          enum: [m, 5m, h, d]
+        hubs:
+          type: array
+          items:
+            type: string
+            format: Hub serial
+        units:
+          type: array
+          items:
+            type: object
+            $ref: "#/components/schemas/UnitDefinition"
+        registers:
+          type: array
+          items:
+            type: object
+            $ref: "#/components/schemas/Register"
+        results:
+          type: object
+          oneOf:
+            - $ref: "#/components/schemas/HistoricalTimeSeriesResultsByTimestamp"
+
+    HistoricalTimeSeriesResultsByTimestamp:
+      type: array
+      items:
+        type: object
+        properties:
+          t: 
+            type: integer
+            format: Unix timestamp
+          r:
+            type: object
+            properties:
+              w: 
+                type: array
+                items:
+                  type: integer
+              i:
+                type: array
+                items:
+                  type: number
+              cost_30d:
+                type: array
+                items:
+                  type: number
+          tot:
+            type: object
+            properties:
+              net:
+                type: object
+                properties:
+                  w: 
+                    type: integer
+                  i: 
+                    type: number
+                  cost_30d: 
+                    type: number
+
+    SingleItemTimeSeries:
+      type: array
+      items: 
+        type: array
+        items:
+          oneOf:
+            - type: integer
+              format: Unix timestamp
+            - type: number
+              format: Curb data reading
+            
+    HistoricalTimeSeriesResultsByRegister:
+      type: object
+      properties:
+        registers:  
+          type: array
+          items: 
+            type: object
+            properties:
+              register: 
+                $ref: "#/components/schemas/Register"
+              values: 
+                type: array
+                items:
+                  type: object
+                  properties: 
+                    unit:
+                      type: string
+                      enum: [w, i, cost_30d]
+                    series:                     
+                      $ref: "#/components/schemas/SingleItemTimeSeries"
+        totals:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: ["net", "cons", "prod", "batt"]
+              values: 
+                type: array
+                items:
+                  type: object
+                  properties: 
+                    unit:
+                      type: string
+                      enum: [w, i, cost_30d]
+                    series:                     
+                      $ref: "#/components/schemas/SingleItemTimeSeries"
