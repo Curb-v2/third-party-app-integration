@@ -1688,6 +1688,13 @@ paths:
       operationId: getEnergyScoreForLocation
       tags:
         - Energy Score
+      parameters:
+        - in: path
+          name: location_id
+          schema:
+            type: string
+            format: uuid
+          required: true        
       responses:
         '200':
           description: Successful request
@@ -1718,6 +1725,13 @@ paths:
       operationId: getBillEstimationForLocation
       tags:
         - Billing
+      parameters:
+        - in: path
+          name: location_id
+          schema:
+            type: string
+            format: uuid
+          required: true          
       responses:
         '200':
           description: Successful request
