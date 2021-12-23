@@ -1848,6 +1848,7 @@ paths:
                       grid: true
                       production: false
                       battery: false
+                      circuit_type: main
                   - avg: -286
                     min: 0
                     max: -1116
@@ -1861,6 +1862,7 @@ paths:
                       grid: false
                       production: true
                       battery: false
+                      circuit_type: breaker_side_production
                   - avg: 0
                     min: 0
                     max: 0
@@ -1874,6 +1876,7 @@ paths:
                       grid: false
                       production: false
                       battery: false
+                      circuit_type: consumption
                   - avg: 0
                     min: 0
                     max: 0
@@ -1887,6 +1890,7 @@ paths:
                       grid: false
                       production: false
                       battery: false
+                      circuit_type: consumption
                   - avg: 0
                     min: 0
                     max: 0
@@ -1900,6 +1904,7 @@ paths:
                       grid: false
                       production: false
                       battery: false
+                      circuit_type: consumption
                   - avg: 0
                     min: 0
                     max: 0
@@ -1913,6 +1918,7 @@ paths:
                       grid: false
                       production: false
                       battery: false
+                      circuit_type: consumption
                   - avg: -72
                     min: 331
                     max: -958
@@ -1926,6 +1932,7 @@ paths:
                       grid: true
                       production: false
                       battery: false
+                      circuit_type: main
                   - avg: -291
                     min: 0
                     max: -1123
@@ -1939,6 +1946,7 @@ paths:
                       grid: false
                       production: true
                       battery: false
+                      circuit_type: breaker_side_production
                   - avg: 0
                     min: 0
                     max: 0
@@ -1952,6 +1960,7 @@ paths:
                       grid: false
                       production: false
                       battery: false
+                      circuit_type: consumption
                   - avg: 0
                     min: 0
                     max: 0
@@ -1965,6 +1974,7 @@ paths:
                       grid: false
                       production: false
                       battery: false
+                      circuit_type: consumption
                   - avg: 0
                     min: 0
                     max: 0
@@ -1978,6 +1988,7 @@ paths:
                       grid: false
                       production: false
                       battery: false
+                      circuit_type: consumption
                   - avg: 0
                     min: 0
                     max: 0
@@ -1991,6 +2002,7 @@ paths:
                       grid: false
                       production: false
                       battery: false
+                      circuit_type: consumption
                   - avg: 0
                     min: 0
                     max: 0
@@ -2004,6 +2016,7 @@ paths:
                       grid: false
                       production: false
                       battery: false
+                      circuit_type: consumption
                   - avg: 0
                     min: 0
                     max: 0
@@ -2017,6 +2030,7 @@ paths:
                       grid: false
                       production: false
                       battery: false
+                      circuit_type: consumption
                   - avg: 0
                     min: 0
                     max: 0
@@ -2030,6 +2044,7 @@ paths:
                       grid: false
                       production: false
                       battery: false
+                      circuit_type: consumption
                   - avg: 0
                     min: 0
                     max: 0
@@ -2043,6 +2058,7 @@ paths:
                       grid: false
                       production: false
                       battery: false
+                      circuit_type: consumption
                   - avg: 0
                     min: 0
                     max: 0
@@ -2056,6 +2072,7 @@ paths:
                       grid: false
                       production: false
                       battery: false
+                      circuit_type: consumption
                   - avg: 0
                     min: 0
                     max: 0
@@ -2069,6 +2086,7 @@ paths:
                       grid: false
                       production: false
                       battery: false
+                      circuit_type: consumption
                   - avg: 365
                     kwh: 8.726
                     register:
@@ -2078,6 +2096,7 @@ paths:
                       production: false
                       battery: false
                       other: true
+                      circuit_type: other
                   totals:
                   - type: net
                     kwh: -5.098
@@ -2085,6 +2104,102 @@ paths:
                     kwh: 8.726
                   - type: prod
                     kwh: -13.824
+
+  /locations/{location_id}/localized_bands:
+    get:
+      summary: Get a series of date ranges that are localized to the location's timezone.
+      description: "
+        This is a convenience endpoint that allows consumers to compute a series of date \"bands\" which can be of any arbitrary size.  
+        \n\n
+        Importantly, if the band size is in units of days, weeks, or months, it will automatically return date ranges that map to the start and end of those times based on the location's timezone.
+        \n\n
+        It is most commonly used when you want to make a series of `/aggregate` calls covering a large range of time.  For example, you may want to show the last 7 days of usage for a location grouped by day, in which case you would use a `from_now_range` of \"7d\", and a `band_size` of \"1d\""
+      operationId: getLocalizedBandsForLocation
+      tags:
+        - Historical
+      parameters:
+        - in: path
+          name: location_id
+          schema:
+            type: string
+            format: uuid
+          required: true    
+        - in: query
+          name: from_now_range
+          schema:
+            type: string
+          description: A shorthand option for describing a date range from the current time.  For example \"3h\" will query for a date range of 3 hours ago to now, \"1mo\" will query from one month (30 days) ago to now.  More on time ranges in our full API docs.
+        - in: query
+          name: band_size
+          schema:
+            type: string
+          description: A timestring describing the size of the bands you wish returned.  For example, if you want bands that are one day duration, use "1d".  You can also use units of "m" (minutes), "h" (hours), "d" (days), "w" (weeks), "mo" (months), or "y" (years).
+          required: true
+        - in: query
+          name: start
+          schema:
+            oneOf:
+              - type: integer
+                format: unix-timestamp
+              - type: string
+                format: date-time
+          description: A date-time string describing the start of the range to query
+          examples:
+            timestamp: 
+              summary: Using a unix timestamp
+              value: 1638982800
+            dateTime:
+              summary: Using a date time ISO string
+              value: '2021-12-08T17:00:00.000Z'  
+        - in: query
+          name: end
+          schema:
+            oneOf:
+              - type: integer
+                format: unix-timestamp
+              - type: string
+                format: date-time
+          description: A date-time string describing the end of the range to query.  
+          examples:
+            timestamp: 
+              summary: Using a unix timestamp
+              value: 1638982800
+            dateTime:
+              summary: Using a date time ISO string
+              value: '2021-12-08T17:00:00.000Z'           
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:    
+              example:
+                count: 8
+                results:
+                - start: '2021-12-15T06:00:00.000Z'
+                  end: '2021-12-16T05:59:59.000Z'
+                  resolution: h
+                - start: '2021-12-16T06:00:00.000Z'
+                  end: '2021-12-17T05:59:59.000Z'
+                  resolution: h
+                - start: '2021-12-17T06:00:00.000Z'
+                  end: '2021-12-18T05:59:59.000Z'
+                  resolution: h
+                - start: '2021-12-18T06:00:00.000Z'
+                  end: '2021-12-19T05:59:59.000Z'
+                  resolution: h
+                - start: '2021-12-19T06:00:00.000Z'
+                  end: '2021-12-20T05:59:59.000Z'
+                  resolution: h
+                - start: '2021-12-20T06:00:00.000Z'
+                  end: '2021-12-21T05:59:59.000Z'
+                  resolution: h
+                - start: '2021-12-21T06:00:00.000Z'
+                  end: '2021-12-22T05:59:59.000Z'
+                  resolution: h
+                - start: '2021-12-22T06:00:00.000Z'
+                  end: '2021-12-23T01:21:53.000Z'
+                  resolution: h
+
 
 
   # /locations/{location_id}/kwh_ranges:
