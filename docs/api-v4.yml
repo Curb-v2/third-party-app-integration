@@ -783,15 +783,15 @@ paths:
           schema:
             type: string
             enum: [register, timestamp, category]
-            default: register
+            default: timestamp
           description: "
-            This parameter determines how the returned data is organized.  The default is \"register\", which is perhaps for consumers who only want to examine a subset of registers, or would like to create a per-register visualization.
+            This parameter determines how the returned data is organized.  The default is \"timestamp\" which is typically the most compact historical data format.  
+            \n\n
+            If you want to easily access data grouped by \"register\", perhaps for consumers who only want to examine a subset of registers, or would like to create a per-register visualization.
             \n\n
             There is also \"category\" which is similar, but registers of the same category are grouped together and their values summed.
             \n\n
-            Using \"timestamp\" will group together all data for a given timestamp.  This is typically the most compact historical data format.
-            \n\n
-            More on these formats in our full API docs"
+            Using \"timestamp\" will group together all data for a given timestamp.  This is typically the most compact historical data format."
         - in: query
           name: fill_all_gaps
           schema:
@@ -1790,6 +1790,13 @@ paths:
               summary: Using a date time ISO string
               value: '2021-12-08T17:00:00.000Z'
         - in: query
+          name: metric
+          schema:
+            type: string
+            enum: [w, i, cost_30d, "w,cost_30d"]
+            default: w
+          description: By default, the only quantitative metric that will be returned is power (watts).  You can also query "i" to query current (amps), and `cost_30d` which will use the location's utility information to compute a 30d cost for a given power usage.  You can specify multiple metrics by comma-separating the different values (eg. "w,cost_30d")
+        - in: query
           name: include_totals
           schema:
             type: boolean
@@ -2458,8 +2465,13 @@ paths:
 
   /locations/{location_id}/bill-estimation:
     get:
-      summary: Estimate the current/projected bill for a given location
-      description: This endpoint runs a cost calculation based on the current usage in the billing period and the designated utility plan.  The billing start date is defined on the LocationBilling
+      summary: Estimate the energy bill for a given location and time range
+      description: "
+        __This endpoint requires the `cost_calculation` API scope, which is only available to privileged clients__
+        \n\n
+        This endpoint runs a bill estimation calculation for a given location and time range.  The estimation takes into account the selected utility for the location including taxes and other fixed costs.
+        \n\n
+        The time range can include time in the future, and if the \"projected\" parameter is set to true, it will estimate future usage data to calculated the estimated bill"
       operationId: getBillEstimationForLocation
       tags:
         - Billing
@@ -2469,7 +2481,52 @@ paths:
           schema:
             type: string
             format: uuid
-          required: true          
+          required: true
+        - in: query
+          name: from_now_range
+          schema:
+            type: string
+          description: A shorthand option for describing a date range from the current time.  For example \"3h\" will query for a date range of 3 hours ago to now, \"1mo\" will query from one month (30 days) ago to now.  More on time ranges in our full API docs.
+        - in: query
+          name: start
+          schema:
+            oneOf:
+              - type: integer
+                format: unix-timestamp
+              - type: string
+                format: date-time
+          description: A date-time string describing the start of the range to query
+          examples:
+            timestamp: 
+              summary: Using a unix timestamp
+              value: 1638982800
+            dateTime:
+              summary: Using a date time ISO string
+              value: '2021-12-08T17:00:00.000Z'  
+        - in: query
+          name: end
+          schema:
+            oneOf:
+              - type: integer
+                format: unix-timestamp
+              - type: string
+                format: date-time
+          description: A date-time string describing the end of the range to query.  
+          examples:
+            timestamp: 
+              summary: Using a unix timestamp
+              value: 1638982800
+            dateTime:
+              summary: Using a date time ISO string
+              value: '2021-12-08T17:00:00.000Z'    
+        - in: query
+          name: projected
+          schema:
+            type: boolean
+          description: "
+            If true and the queried time range is in the future, this will use projected values to estimate the bill.  
+            \n
+            Some part of the queried time range must include time for which we have real historical data.  If you "
       responses:
         '200':
           description: Successful request
@@ -2553,6 +2610,112 @@ paths:
                   dataValue: '15'
                   accuracy: 100
 
+  /locations/{location_id}/bill-estimation/current:
+    get:
+      summary: Estimate the current energy bill for a given location, optionally projected through the end of the billing period
+      description: "
+        __This endpoint requires the `cost_calculation` API scope, which is only available to privileged clients__
+        \n\n
+        This endpoint runs a bill estimation calculation for a given location.  The estimation takes into account the selected utility for the location including taxes and other fixed costs.  It also takes into account the billing start date associated with the location (defaults to the first of the month)
+        \n\n
+        Oftentimes with this endpoint, the \"projected\" parameter is set to true, which will use estimated usage through the end of the billing period"        
+      operationId: getCurrentBillEstimationForLocation
+      tags:
+        - Billing
+      parameters:
+        - in: path
+          name: location_id
+          schema:
+            type: string
+            format: uuid
+          required: true
+        - in: query
+          name: projected
+          schema:
+            type: boolean
+          description: If true, this will use projected values to estimate the bill through the end of the billing period 
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              example:
+                calculatedCostId: 83f650ff-54ee-495d-9033-8a96e4967d83
+                masterTariffId: 80693
+                tariffName: Residential
+                totalCost: 8.1
+                fromDateTime: '2021-12-01T00:00:00-06:00'
+                toDateTime: '2021-12-19T21:00:00-06:00'
+                currency: USD
+                summary:
+                  subTotalCost: 7.72
+                  taxCost: 0.38
+                  totalCost: 8.1
+                  adjustedTotalCost: 8.1
+                  kWh: 21.99
+                  kW: 0.84
+                  SOLAR_PV:
+                    systemSize: 15
+                accuracy: 100
+                items:
+                - fromDateTime: '2021-12-01T00:00:00-06:00'
+                  toDateTime: '2022-01-01T00:00:00-06:00'
+                  quantityKey: fixed
+                  rateAmount: 6.08870968
+                  itemQuantity: 1
+                  cost: 6.08870968
+                  chargeType: FIXED_PRICE
+                - fromDateTime: '2021-12-01T00:00:00-06:00'
+                  toDateTime: '2022-01-01T00:00:00-06:00'
+                  quantityKey: consumption
+                  rateAmount: 0.074
+                  itemQuantity: 21.989
+                  cost: 1.627186
+                  chargeType: CONSUMPTION_BASED
+                - fromDateTime: '2021-12-01T00:00:00-06:00'
+                  toDateTime: '2022-01-01T00:00:00-06:00'
+                  quantityKey: quantity
+                  rateAmount: -0.05906048
+                  itemQuantity: 0
+                  cost: 0
+                  chargeType: QUANTITY
+                - fromDateTime: '2021-12-01T00:00:00-06:00'
+                  toDateTime: '2022-01-01T00:00:00-06:00'
+                  quantityKey: tax
+                  rateAmount: 0.05
+                  itemQuantity: 7.71589568
+                  cost: 0.38579478
+                  chargeType: TAX
+                assumptions:
+                - keyName: tariffId
+                  dataType: INTEGER
+                  fromDateTime: '2021-12-01T00:00:00-06:00'
+                  toDateTime: '2021-12-19T21:00:00-06:00'
+                  dataValue: '3395617'
+                - keyName: cityLimits
+                  displayName: Service Area (Inside/outside city limits)
+                  description: Has service inside or outside city limits
+                  dataType: STRING
+                  fromDateTime: '2021-12-01T00:00:00-06:00'
+                  toDateTime: '2021-12-19T21:00:00-06:00'
+                  dataValue: Inside
+                  accuracy: 80
+                - keyName: solarSystemOutput
+                  displayName: Solar System Output (kWh)
+                  description: Solar System Output (kWh)
+                  dataType: DECIMAL
+                  fromDateTime: '2021-12-01T00:00:00-06:00'
+                  toDateTime: '2021-12-19T21:00:00-06:00'
+                  dataValue: '0'
+                  accuracy: 80
+                - keyName: systemSize
+                  displayName: System Size
+                  description: Nameplate capacity (kW).
+                  dataType: DECIMAL
+                  fromDateTime: '2021-12-01T00:00:00-06:00'
+                  toDateTime: '2021-12-19T21:00:00-06:00'
+                  dataValue: '15'
+                  accuracy: 100
 
 # END PATHS
 components:
