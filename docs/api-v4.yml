@@ -2371,17 +2371,17 @@ paths:
           content:
             application/json:
               example:
-                - location: 8cccef48-0917-4d85-8ec0-7d3590c73ffa
-                  date: 1642485600
-                  season: 2021-winter
-                  behavioral: 129.59
-                  total: 129.59
-                  weather_related: 129.59
-                  kwh:
-                    behavioral: 2.59
-                    uncategorized: 2.484
-                    categories:
-                      Places-Garage: 0.108
+                location: 8cccef48-0917-4d85-8ec0-7d3590c73ffa
+                date: 1642485600
+                season: 2021-winter
+                behavioral: 129.59
+                total: 129.59
+                weather_related: 129.59
+                kwh:
+                  behavioral: 2.59
+                  uncategorized: 2.484
+                  categories:
+                    Places-Garage: 0.108
 
   /locations/{location_id}/energy-score:
     get:
