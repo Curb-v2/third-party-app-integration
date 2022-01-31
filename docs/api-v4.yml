@@ -2371,13 +2371,17 @@ paths:
           content:
             application/json:
               example:
-                location: bb2a7430-3143-44b6-9f0d-22890b2c7f92
-                dt_created: '2021-12-21T06:00:00.000Z'
-                start: '2021-12-20T06:00:00.000Z'
-                end: '2021-12-21T05:59:59.999Z'
-                overall: 34.6755
-                weather_related: 25.0691
-                behavioral: 47.1588
+                - location: 8cccef48-0917-4d85-8ec0-7d3590c73ffa
+                  date: 1642485600
+                  season: 2021-winter
+                  behavioral: 129.59
+                  total: 129.59
+                  weather_related: 129.59
+                  kwh:
+                    behavioral: 2.59
+                    uncategorized: 2.484
+                    categories:
+                      Places-Garage: 0.108
 
   /locations/{location_id}/energy-score:
     get:
@@ -2439,29 +2443,31 @@ paths:
           content:
             application/json:
               example:
-                count: 3
+                count: 2
                 results:
-                - location: bb2a7430-3143-44b6-9f0d-22890b2c7f92
-                  dt_created: '2021-12-21T06:00:00.000Z'
-                  start: '2021-12-20T06:00:00.000Z'
-                  end: '2021-12-21T05:59:59.999Z'
-                  overall: 34.6755
-                  weather_related: 25.0691
-                  behavioral: 47.1588
-                - location: bb2a7430-3143-44b6-9f0d-22890b2c7f92
-                  dt_created: '2021-12-20T06:00:00.000Z'
-                  start: '2021-12-19T06:00:00.000Z'
-                  end: '2021-12-20T05:59:59.999Z'
-                  overall: 74.4139
-                  weather_related: 27.9116
-                  behavioral: 75.9111
-                - location: bb2a7430-3143-44b6-9f0d-22890b2c7f92
-                  dt_created: '2021-12-19T06:00:00.000Z'
-                  start: '2021-12-18T06:00:00.000Z'
-                  end: '2021-12-19T05:59:59.999Z'
-                  overall: 45.3101
-                  weather_related: 36.0361
-                  behavioral: 78.1502
+                - location: 8cccef48-0917-4d85-8ec0-7d3590c73ffa
+                  date: 1642464000
+                  season: 2021-winter
+                  behavioral: 113.95
+                  total: 113.95
+                  weather_related: 113.95
+                  kwh:
+                    behavioral: 6.296
+                    uncategorized: 6.019
+                    categories:
+                      MajorAppliances-Range: 0.158
+                      Places-Garage: 0.119
+                - location: 8cccef48-0917-4d85-8ec0-7d3590c73ffa
+                  date: 1642485600
+                  season: 2021-winter
+                  behavioral: 129.59
+                  total: 129.59
+                  weather_related: 129.59
+                  kwh:
+                    behavioral: 2.59
+                    uncategorized: 2.484
+                    categories:
+                      Places-Garage: 0.108
 
   /locations/{location_id}/bill-estimation:
     get:
