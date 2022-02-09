@@ -249,6 +249,39 @@ paths:
                 geocode: 30.19631100,-97.73080700
                 timezone: America/Chicago                
 
+  /locations/{location_id}/detail:
+    get:
+      summary: Get additional details for a location by location id
+      operationId: getLocationDetails
+      parameters:
+        - in: path
+          name: location_id
+          schema:
+            type: string
+            format: uuid
+          required: true
+      tags:
+        - Configuration
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:    
+              schema:
+                type: object
+                $ref: "#/components/schemas/LocationDetail"
+              example: 
+                id: bb2a7430-3143-44b6-9f0d-22890b2c7f92
+                dt_last_sample_received: '2022-02-09T18:48:00.000Z'
+                dt_active_since: '2020-02-12T04:48:06.000Z'
+                active_now: true
+                has_mains: true
+                has_production: true
+                has_battery: false
+                has_consumption: true
+                installations_count: 1
+                fleet: curb
+
   /locations/{location_id}/installations:
     get:
       summary: List installations for a location
@@ -768,7 +801,7 @@ paths:
           name: metric
           schema:
             type: string
-            enum: [w, i, cost_30d, "w,cost_30d"]
+            enum: [w, i, cost_30d]
             default: w
           description: By default, the only quantitative metric that will be returned is power (watts).  You can also query "i" to query current (amps), and `cost_30d` which will use the location's utility information to compute a 30d cost for a given power usage.  You can specify multiple metrics by comma-separating the different values (eg. "w,cost_30d")
         - in: query
@@ -778,6 +811,13 @@ paths:
             default: false
           allowEmptyValue: true
           description: When true, this parameter tells the API to include totals in the response.  These totals include `net` (net grid impact) and `cons` (consuption), and possibly `prod` (production) and `batt` (battery) if those services are enabled at the location.
+        - in: query
+          name: include_cost
+          schema:
+            type: boolean
+            default: false
+          allowEmptyValue: true
+          description: When true, this parameter tells the API to calculate an estimated 30-day cost for each register in the response.  Setting this to true is equivalent to adding "cost_30d" into the `metrics` parameter.  A negative cost should be interpreted as a credit.
         - in: query
           name: group_by
           schema:
@@ -1797,6 +1837,13 @@ paths:
             default: w
           description: By default, the only quantitative metric that will be returned is power (watts).  You can also query "i" to query current (amps), and `cost_30d` which will use the location's utility information to compute a 30d cost for a given power usage.  You can specify multiple metrics by comma-separating the different values (eg. "w,cost_30d")
         - in: query
+          name: include_cost
+          schema:
+            type: boolean
+            default: false
+          allowEmptyValue: true
+          description: When true, this parameter tells the API to calculate an estimated cost for each register in the response.  This cost is based on the energy consumed/produced and the utility plan that has been selected for this location.  A negative cost should be interpreted as a credit.
+        - in: query
           name: include_totals
           schema:
             type: boolean
@@ -2808,6 +2855,35 @@ components:
         - id
         - dt_created
         - dt_modified
+        
+    LocationDetail:
+      type: object
+      properties: 
+        id:
+          type: string
+          format: uuid
+        dt_last_sample_received:
+          type: string
+          format: date-time
+        dt_active_since:
+          type: string
+          format: date-time
+        active_now:
+          type: boolean
+        has_mains:
+          type: boolean
+        has_production:
+          type: boolean
+        has_battery:
+          type: boolean
+        has_consumption:
+          type: boolean
+        installations_count:
+          type: integer
+        fleet:
+          type: string 
+          nullable: true
+
     Installation:
       type: object
       properties:
