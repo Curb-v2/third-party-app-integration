@@ -252,6 +252,7 @@ paths:
   /locations/{location_id}/detail:
     get:
       summary: Get additional details for a location by location id
+      description: This endpoint describes additional details for a location, such as when it was activated, when its most recent sample was posted, if it currently has Curb devices that are online, and if the location has production or batteries enabled.    
       operationId: getLocationDetails
       parameters:
         - in: path
