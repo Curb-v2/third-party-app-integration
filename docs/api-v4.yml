@@ -12,6 +12,7 @@ info:
     name: MIT
 servers:
   - url: https://app.staging.energycurb.com/api/v4
+  - url: https://app.energycurb.com/api/v4
 security:
   - bearerAuth: []
 
