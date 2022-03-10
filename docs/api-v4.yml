@@ -1776,7 +1776,6 @@ paths:
             type: string
             enum: [m, 5m, h, d]
           description: The sample resolution for the query.  These are fixed to the `m` for minutes, `5m` for five minutes, `h` for hours, and `d` for days.  If omitted, the coarsest (largest) resolution that effectively covers the queried range will be used.
-          required: true
         - in: query
           name: from_now_range
           schema:
