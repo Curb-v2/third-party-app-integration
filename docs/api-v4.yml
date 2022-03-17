@@ -877,6 +877,8 @@ paths:
           description: Successful request
           content:
             application/json:    
+              schema:
+                $ref: '#/components/schemas/HistoricalTimeSeriesResponse'            
               examples:
                 group_by=timestamp:
                   value:
@@ -3118,8 +3120,9 @@ components:
             $ref: "#/components/schemas/Register"
         results:
           type: object
-          oneOf:
-            - $ref: "#/components/schemas/HistoricalTimeSeriesResultsByTimestamp"
+          items:
+            type: object
+            $ref: "#/components/schemas/HistoricalTimeSeriesResultsByTimestamp"
 
     HistoricalTimeSeriesResultsByTimestamp:
       type: array
@@ -3167,6 +3170,7 @@ components:
               format: Unix timestamp
             - type: number
               format: Curb data reading
+            
             
     HistoricalTimeSeriesResultsByRegister:
       type: object
