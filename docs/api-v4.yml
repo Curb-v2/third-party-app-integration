@@ -2,8 +2,8 @@
 
 openapi: "3.0.0"
 info:
-  version: 4.0.0.alpha
-  title: Curb API
+  version: 4.0.0
+  title: Curb Public API
   description: "
     This API is designed both for Curb end-users or for developers looking to build an end-user facing application, as well as for our partner fleet organizations.  Authentication is performed via Auth0.  Once you have an access token, you can interact with this API clicking the \"Authorize\" button below.
     \n\n
