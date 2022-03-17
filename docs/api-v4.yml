@@ -2229,6 +2229,16 @@ paths:
           description: Successful request
           content:
             application/json:    
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  results:
+                    type: array
+                    items: 
+                      type: object
+                      $ref: "#/components/schemas/LocalizedBand"
               example:
                 count: 8
                 results:
@@ -2420,6 +2430,8 @@ paths:
           description: Successful request
           content:
             application/json:
+              schema: 
+                $ref: "#/components/schemas/EnergyScore"
               example:
                 location: 8cccef48-0917-4d85-8ec0-7d3590c73ffa
                 date: 1642485600
@@ -2492,6 +2504,16 @@ paths:
           description: Successful request
           content:
             application/json:
+              schema: 
+                type: object
+                properties:
+                  count: 
+                    type: integer
+                  results:
+                    type: array
+                    items: 
+                      type: object
+                      $ref: "#/components/schemas/EnergyScore"                      
               example:
                 count: 2
                 results:
@@ -3171,7 +3193,6 @@ components:
             - type: number
               format: Curb data reading
             
-            
     HistoricalTimeSeriesResultsByRegister:
       type: object
       properties:
@@ -3210,3 +3231,45 @@ components:
                       enum: [w, i, cost_30d]
                     series:                     
                       $ref: "#/components/schemas/SingleItemTimeSeries"
+
+    LocalizedBand:
+      type: object
+      properties:
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        resolution:
+          type: string
+          enum: [m, 5m, h, d]
+
+    EnergyScore:
+      type: object
+      properties:
+        location:
+          type: string
+          format: uuid
+        date:
+          type: integer
+          format: unix-timestamp
+        season:
+          type: string
+        behavioral:
+          type: number
+        total:
+          type: number
+        weather_related:
+          type: number
+        kwh:
+          type: object
+          properties:
+            behavioral:
+              type: number
+            uncategorized:
+              type: number
+            categories:
+              type: object
+              additionalProperties: 
+                type: number
