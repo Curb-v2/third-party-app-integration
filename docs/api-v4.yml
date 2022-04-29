@@ -746,6 +746,24 @@ paths:
             enum: [m, 5m, h, d]
           description: The sample resolution for the query.  These are fixed to the `m` for minutes, `5m` for five minutes, `h` for hours, and `d` for days.  If omitted, the coarsest (largest) resolution that effectively covers the queried range will be used.
         - in: query
+          name: localized_band_duration
+          schema:
+            type: string
+          description: "
+            This parameter specifies a custom interval duration for the timeseries response, that is optionally aligned with the location's timezone.  
+            \n\n
+            When omitted, the API will return timeseries intervals matching the \"resolution\" of the request.  However, when using a \"resolution\" of \"d\", those samples are always representing a day in UTC.  If you want to use intervals of unit day, week, or month, and want to ensure they are localized to the location's timezone, use this parameter."
+          examples:
+            15m:
+              summary: 15-minute intervals
+              value: "15m"
+            1d:
+              summary: 1-day intervals
+              value: "1d"
+            2w:
+              summary: 2-week intervals
+              value: "2w"
+        - in: query
           name: from_now_range
           schema:
             type: string
@@ -800,12 +818,17 @@ paths:
               summary: Using a date time ISO string
               value: '2021-12-08T17:00:00.000Z'          
         - in: query
-          name: metric
+          name: localized_band_duration
           schema:
             type: string
-            enum: [w, i, cost_30d]
+          description: A shorthand option for describing a date range from the current time.  For example \"3h\" will query for a date range of 3 hours ago to now, \"1mo\" will query from one month (30 days) ago to now.  More on time ranges in our full API docs.
+        - in: query
+          name: metrics
+          schema:
+            type: string
+            enum: [w, kwh, i, cost, cost_30d]
             default: w
-          description: By default, the only quantitative metric that will be returned is power (watts).  You can also query "i" to query current (amps), and `cost_30d` which will use the location's utility information to compute a 30d cost for a given power usage.  You can specify multiple metrics by comma-separating the different values (eg. "w,cost_30d")
+          description: By default, the only quantitative metric that will be returned is power (watts).  You can also query "i" to query current (amps), "kwh" to query energy over the duration of the sample period, "cost" over the sample period", and `cost_30d` which will use the location's utility information to compute a 30-dday cost for a given power usage.  You can specify multiple metrics by comma-separating the different values (eg. "w,kwh,cost_30d")
         - in: query
           name: include_totals
           schema:
@@ -887,6 +910,7 @@ paths:
                     synthetic_samples_count: 0
                     start: 1639936800
                     end: 1639937699
+                    sample_duration: 300
                     resolution: 5m
                     hubs:
                     - crhs5ma2
@@ -3122,6 +3146,8 @@ components:
         end: 
           type: integer
           format: Unix-timestamp
+        sample_duration:
+          type: integer
         resolution: 
           type: string
           enum: [m, 5m, h, d]
