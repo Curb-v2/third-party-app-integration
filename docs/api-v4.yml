@@ -128,7 +128,95 @@ paths:
                     user_id: "auth0|5fa1f61691dfd60072b812dc"
                     last_ip: "136.49.149.11"
                     last_login: "2021-11-22T22:41:56.756Z"
-                    logins_count: 32                    
+                    logins_count: 32      
+    patch:
+      summary: Update the current user
+      description: This endpoint allows end users to update their user data.  This endpoint is only available for users, not for organizations
+      operationId: updateUser
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:            
+            schema:
+              $ref: '#/components/schemas/User'
+            example:
+              name: Test User
+              phone_number: "+15125551234"
+
+      responses: 
+        '200':
+          description: Valid request
+          content:
+            application/json:    
+              schema:
+                type: object
+                $ref: '#/components/schemas/User'
+                example:
+                  user_id: "auth0|5fa1f61691dfd60072b812dc"
+                  notificationsettings:
+                    user: "auth0|5fa1f61691dfd60072b812dc"
+                    dt_created: "2020-12-14T22:44:37.392543Z"
+                    dt_modified: "2020-12-14T22:44:37.392577Z"
+                    notification_types:
+                      - direct
+                      - solar_status
+                      - hub_status
+                  useraccess_set:
+                  - location:
+                      id: bb2a7430-3143-44b6-9f0d-22890b2c7f92
+                      dt_created: '2019-01-28T17:13:49.593389Z'
+                      dt_modified: '2021-11-22T22:48:13.475634Z'
+                      organization: curb
+                      label: Main House
+                      country: USA
+                      state: TX
+                      city: Austin
+                      postcode: '78744'
+                      address: 1234 Grey Stone Drive
+                      geocode: 30.19631100,-97.73080700
+                      timezone: America/Chicago
+                    installation:
+                    access_level: full
+                    fleet:
+                    id: 5dad292c-31d0-4f2b-9f55-bf755a821ecc
+                  dt_created: '2020-11-04T00:31:06.263067Z'
+                  dt_modified: '2021-11-22T22:51:34.077206Z'
+                  name: Test User
+                  user_type: homeowner
+                  phone_number: "+15125551234"
+                  email_address: test+staging@energycurb.com
+                  provider: curb
+                  accepted_eula: true
+                  walkthrough_complete: false
+                  accepted_provider_agreement: false
+                  accepted_hazard_warning: false
+                  default_location:
+                  live_data_unit: w      
+                  auth0:
+                    nickname: "test+staging"
+                    name: "test+staging@energycurb.com"
+                    picture: "https://s.gravatar.com/avatar/af23e57041db34ef2b83c2c8e40b29cf?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fte.png"
+                    updated_at: "2021-11-22T22:41:56.756Z"
+                    email: "test+staging@energycurb.com"
+                    email_verified: false
+                    iss: "https://staging-energycurb.auth0.com/"
+                    sub: "auth0|5fa1f61691dfd60072b812dc"
+                    aud: "BZO5TDNSZ7IOTSNvkkmGlZp34fV9NzRg"
+                    iat: 1638487783
+                    exp: 1638523783
+                    at_hash: "LJuQt8v_wkPtYrupOSot-w"
+                    created_at: "2020-11-04T00:30:14.847Z"
+                    identities:
+                      - user_id: "5fa1f61691dfd60072b812dc"
+                        provider: "auth0"
+                        connection: "Users"
+                        isSocial: false
+                    user_id: "auth0|5fa1f61691dfd60072b812dc"
+                    last_ip: "136.49.149.11"
+                    last_login: "2021-11-22T22:41:56.756Z"
+                    logins_count: 32                                        
   /locations:
     get:
       summary: List locations to which the given user has access
@@ -726,7 +814,7 @@ paths:
         \n\n
         You must define a query range by using either `from_now_range` or both the `start` and `end` query parameters.  More on how to define that range [here](https://github.com/Curb-v2/third-party-app-integration#curb-integrations).
         \n\n
-        The response schema can vary greatly depending on the `group_by` query parameter.  The default value is `timestamp` which groups all readings together by timestamp
+        The response schema can vary greatly depending on the `group_by` query parameter.  The default value is `timestamp` which groups all readings together by timestamp.  If you want a time series for each Register in the location, use a `group_by` parameter of `register`
         \n\n
         "
       operationId: getHistoricalForLocation
@@ -746,13 +834,15 @@ paths:
             enum: [m, 5m, h, d]
           description: The sample resolution for the query.  These are fixed to the `m` for minutes, `5m` for five minutes, `h` for hours, and `d` for days.  If omitted, the coarsest (largest) resolution that effectively covers the queried range will be used.
         - in: query
-          name: localized_band_duration
+          name: interval_size
           schema:
             type: string
           description: "
-            This parameter specifies a custom interval duration for the timeseries response, that is optionally aligned with the location's timezone.  
+            This parameter specifies a custom interval duration for the timeseries response.  Use this if you want to use an interval size that does __not__ match one of our fixed data resolutions.  Importantly, when you use a \"resolution\" value of `d`, that represents a midnight to midnight day in UTC, not in the local timezone.  However, if you use an \"interval_size\" of `1d`, it will create intervals localized to the location's timezone.  The same applies for weeks or months.
             \n\n
-            When omitted, the API will return timeseries intervals matching the \"resolution\" of the request.  However, when using a \"resolution\" of \"d\", those samples are always representing a day in UTC.  If you want to use intervals of unit day, week, or month, and want to ensure they are localized to the location's timezone, use this parameter."
+            When omitted, the API will return time series intervals matching the \"resolution\" of the request.  However, when using a \"resolution\" of \"d\", those samples are always representing a day in UTC.
+            \n\n
+            Using this parameter has implications with `page_size`, please check the `page_size` docs below."
           examples:
             15m:
               summary: 15-minute intervals
@@ -816,19 +906,25 @@ paths:
               value: 1638982800
             dateTime:
               summary: Using a date time ISO string
-              value: '2021-12-08T17:00:00.000Z'          
+              value: '2021-12-08T17:00:00.000Z'
         - in: query
-          name: localized_band_duration
+          name: page_size
           schema:
-            type: string
-          description: A shorthand option for describing a date range from the current time.  For example \"3h\" will query for a date range of 3 hours ago to now, \"1mo\" will query from one month (30 days) ago to now.  More on time ranges in our full API docs.
+            type: integer
+            default: 500
+            minimum: 1
+            maximum: 1000
+          description: "
+            The maximum number of items to query.  If this number is smaller than the number of items in the queried range, the response will be paginated using `next` and `previous` URLs.
+            \n\n
+            This value refers to the number of underlying items to request, but if you use this in conjunction with `interval_size`, the number of items in the response can be smaller than `page_size`.  For example, if using an `interval_size` of `20m` and a `page_size` of `500`, the API will fetch 500 5-minute intervals from which to aggregate into only 125 20-minute averaged intervals."
         - in: query
           name: metrics
           schema:
             type: string
             enum: [w, kwh, i, cost, cost_30d]
             default: w
-          description: By default, the only quantitative metric that will be returned is power (watts).  You can also query "i" to query current (amps), "kwh" to query energy over the duration of the sample period, "cost" over the sample period", and `cost_30d` which will use the location's utility information to compute a 30-dday cost for a given power usage.  You can specify multiple metrics by comma-separating the different values (eg. "w,kwh,cost_30d")
+          description: By default, the only quantitative metric that will be returned is power (watts).  You can also query "i" to query current (amps), "kwh" to query energy over the duration of the sample period, "cost" over the sample period", and `cost_30d` which will use the location's utility information to compute a 30-day cost for a given power usage.  You can specify multiple metrics by comma-separating the different values (eg. "w,kwh,cost_30d")
         - in: query
           name: include_totals
           schema:
@@ -842,7 +938,7 @@ paths:
             type: boolean
             default: false
           allowEmptyValue: true
-          description: When true, this parameter tells the API to calculate an estimated 30-day cost for each register in the response.  Setting this to true is equivalent to adding "cost_30d" into the `metrics` parameter.  A negative cost should be interpreted as a credit.
+          description: When true, this parameter tells the API to calculate an estimated 30-day cost for each register in the response.  Setting this to true is equivalent to adding "cost,cost_30d" into the `metrics` parameter.  A negative cost should be interpreted as a credit.
         - in: query
           name: group_by
           schema:
@@ -857,18 +953,18 @@ paths:
             There is also \"category\" which is similar, but registers of the same category are grouped together and their values summed.
             \n\n
             Using \"timestamp\" will group together all data for a given timestamp.  This is typically the most compact historical data format."
-        - in: query
-          name: fill_all_gaps
-          schema:
-            type: boolean
-            default: false
-          allowEmptyValue: true
-          description: "
-            This option tells the API how to handle gaps in the data for the defined range.  If true, this will force the API to return a synthetic time series object for every timestamp in the defined range/resolution.  Some consumers may wish to have some value returned for 100% of the queried range, which is what this parameter does.
-            \n\n
-            Without this parameter, the API will not include any synthetic time series objects for times that we have no data.  However, bear in mind that for locations which have more than one Curb device, it is possible to have \"partial\" gaps, which is when there is data for some hubs and not others for a given timestamp.  These partial gaps will always be filled regardless of if `fill_all_gaps` is true.
-            \n\n
-            This parameter is often used in combination with the `interpolate` parameter to ensure numeric data is returned for every timestamp in the queried range."
+        # - in: query
+        #   name: fill_all_gaps
+        #   schema:
+        #     type: boolean
+        #     default: false
+        #   allowEmptyValue: true
+        #   description: "
+        #     This option tells the API how to handle gaps in the data for the defined range.  If true, this will force the API to return a synthetic time series object for every timestamp in the defined range/resolution.  Some consumers may wish to have some value returned for 100% of the queried range, which is what this parameter does.
+        #     \n\n
+        #     Without this parameter, the API will not include any synthetic time series objects for times that we have no data.  However, bear in mind that for locations which have more than one Curb device, it is possible to have \"partial\" gaps, which is when there is data for some hubs and not others for a given timestamp.  These partial gaps will always be filled regardless of if `fill_all_gaps` is true.
+        #     \n\n
+        #     This parameter is often used in combination with the `interpolate` parameter to ensure numeric data is returned for every timestamp in the queried range."
         - in: query
           name: interpolate
           schema:
@@ -876,7 +972,7 @@ paths:
             default: false
           allowEmptyValue: true
           description: "
-            This option tells the API what values it should use when creating a synthetic time series object.  Synthetic time series objects are created for \"partial\" gaps (when there is data for some hubs and not others in a multi-hub location for a given timestamp), or when the `fill_all_gaps` parameter above is set to true.
+            This option tells the API what values it should use when creating a synthetic time series object.  Synthetic time series objects are created for when there is missing data for one or more devices in a location.
             \n\n
             When this parameter is false (as it is by default), all numeric values in synthetic time series objects will be set to `null`.  When this parameter is true, all numeric values in time series objects will be interpolated from nearby real data.
             \n\n
@@ -908,9 +1004,11 @@ paths:
                     count: 3
                     real_samples_count: 3
                     synthetic_samples_count: 0
+                    previous: null,
+                    next: null,
                     start: 1639936800
                     end: 1639937699
-                    sample_duration: 300
+                    interval_seconds: 300
                     resolution: 5m
                     hubs:
                     - crhs5ma2
@@ -1144,8 +1242,11 @@ paths:
                     count: 3
                     real_samples_count: 3
                     synthetic_samples_count: 0
+                    previous: null,
+                    next: null,
                     start: 1639936800
                     end: 1639937699
+                    interval_seconds: 300                    
                     resolution: 5m
                     hubs:
                     - crhs5ma2
@@ -1508,7 +1609,10 @@ paths:
                             - -1375
                           - - 1639937400
                             - -1588
-            
+        '400':
+          description: Bad request
+        '404':
+          description: No historical data found
 
   /locations/{location_id}/historical/latest:
     get:
@@ -1781,6 +1885,10 @@ paths:
                     - 0
                     - 0
                     - 436
+        '400':
+          description: Bad request
+        '404':
+          description: No historical data found
 
   /locations/{location_id}/aggregate:
     get:
@@ -2185,6 +2293,10 @@ paths:
                     kwh: 8.726
                   - type: prod
                     kwh: -13.824
+        '400':
+          description: Bad request
+        '404':
+          description: No historical data found
 
   /locations/{location_id}/localized_bands:
     get:
@@ -2268,30 +2380,36 @@ paths:
                 results:
                 - start: '2021-12-15T06:00:00.000Z'
                   end: '2021-12-16T05:59:59.000Z'
+                  partial: false
                   resolution: h
                 - start: '2021-12-16T06:00:00.000Z'
                   end: '2021-12-17T05:59:59.000Z'
+                  partial: false
                   resolution: h
                 - start: '2021-12-17T06:00:00.000Z'
                   end: '2021-12-18T05:59:59.000Z'
+                  partial: false
                   resolution: h
                 - start: '2021-12-18T06:00:00.000Z'
                   end: '2021-12-19T05:59:59.000Z'
+                  partial: false
                   resolution: h
                 - start: '2021-12-19T06:00:00.000Z'
                   end: '2021-12-20T05:59:59.000Z'
+                  partial: false
                   resolution: h
                 - start: '2021-12-20T06:00:00.000Z'
                   end: '2021-12-21T05:59:59.000Z'
+                  partial: false
                   resolution: h
                 - start: '2021-12-21T06:00:00.000Z'
                   end: '2021-12-22T05:59:59.000Z'
+                  partial: false
                   resolution: h
                 - start: '2021-12-22T06:00:00.000Z'
                   end: '2021-12-23T01:21:53.000Z'
+                  partial: true
                   resolution: h
-
-
 
   # /locations/{location_id}/kwh_ranges:
   #   get:
@@ -2827,6 +2945,44 @@ components:
       scheme: bearer
       bearerFormat: JWT    
   schemas:
+    User:
+      type: object
+      properties: 
+        accepted_eula:
+          type: boolean
+        accepted_hazard_warning:
+          type: boolean
+        accepted_provider_agreement:
+          type: boolean
+        default_location:
+          type: string
+          format: uuid
+          nullable: true
+        dt_created:
+          type: string
+          format: date-time
+        dt_modified:
+          type: string
+          format: date-time
+        email_address:
+          type: string
+          format: email
+        live_data_unit:
+          type: string
+          nullable: true
+        phone_number:
+          type: string
+          nullable: true
+        user_type:
+          type: string
+          enum: [homeowner]
+        useraccess_set:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserAccess"        
+        auth0User:
+          type: object
+          $ref: "#/components/schemas/Auth0User"        
     Auth0User:
       type: object
       properties:
@@ -3146,7 +3302,17 @@ components:
         end: 
           type: integer
           format: Unix-timestamp
-        sample_duration:
+        previous:
+          type: string
+          format: url
+          nullable: true
+          description: Absolute URL of previous page of results.  If no previous page exists, this will be null
+        next:
+          type: string
+          format: url
+          nullable: true
+          description: Absolute URL of next page of results.  If no next page exists, this will be null
+        interval_seconds:
           type: integer
         resolution: 
           type: string
@@ -3267,6 +3433,9 @@ components:
         end:
           type: string
           format: date-time
+        partial:
+          type: boolean
+          description: Has this band not yet completed
         resolution:
           type: string
           enum: [m, 5m, h, d]
