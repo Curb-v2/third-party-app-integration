@@ -1,8 +1,10 @@
 # Curb Integrations
 
+<!--
 ## Curb v4 API
 
 ### Please see the [full OpenAPI docs for the Curb v4 API here](https://curb-v2.github.io/third-party-app-integration/index.html)
+-->
 
 ### Query parameters
 
