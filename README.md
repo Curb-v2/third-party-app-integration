@@ -1,7 +1,27 @@
 # Curb Integrations
-Examples and documentation for third party apps integrations with Curb.  There are couple of skeleton example apps to help get you started:
 
-* [Basic web app](https://github.com/Curb-v2/third-party-app-integration/tree/master/web-app) - a straightforward web app that consumes the Curb API on the server side.
-* [Simple browser client](https://github.com/Curb-v2/third-party-app-integration/tree/master/simple-browser-client) - a serverless browser client that connects to the Curb API.
+## Curb v4 API
 
-[API docs here](https://github.com/Curb-v2/third-party-app-integration/blob/master/docs/api.md)
+### Please see the [full OpenAPI docs for the Curb v4 API here](https://curb-v2.github.io/third-party-app-integration/index.html)
+
+### Query parameters
+
+#### Describing times, ranges, and resolutions
+
+__Timestrings__ 
+You can use a timestring to describe a time range or a data resolution.
+
+Unit | Value | | | Resolution unit | Value
+--- | --- | --- | --- | --- | ---
+__m__ | minutes | | | __m__ | minutes
+__h__ | hours | | | __5m__ | 5 minutes
+__d__ | days | | | __h__ | hours
+__w__ | weeks | | | __d__ | days
+__mo__ | months
+__y__ | years
+
+The `from_now_range` parameter is a string representing the amount of time back from the present moment that you would like to query. It must contain a magnitude and a unit value. For example, to query the last 15 minutes, your rangeId would be "15m". To query the last 6 weeks, the rangeId would be "6w".
+
+The `resolution` parameter specifies what granularity level you would like to query. Note that smaller resolutions will result in slower requests and larger response payloads. "m", "5m", "h", and "d" are the only allowed resolution values.
+
+You can also define a range by using both `start` and `end` query parameters.  These are dates, which can either be [ISO standard strings](https://en.wikipedia.org/wiki/ISO_8601) or [Unix timestamps](https://en.wikipedia.org/wiki/Unix_time).  Curb sample data uses Unix timestamps, so when 

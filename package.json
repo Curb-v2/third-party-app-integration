@@ -1,0 +1,29 @@
+{
+  "name": "third-party-app-integration",
+  "version": "1.0.0",
+  "description": "Examples and documentation for third party apps integrations with Curb.  There are couple of skeleton example apps to help get you started:",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "preview": "http-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Curb-v2/third-party-app-integration.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Curb-v2/third-party-app-integration/issues"
+  },
+  "homepage": "https://github.com/Curb-v2/third-party-app-integration#readme",
+  "dependencies": {
+    "swagger-ui": "^4.1.2"
+  },
+  "devDependencies": {
+    "http-server": "^14.0.0"
+  }
+}
