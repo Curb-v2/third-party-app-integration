@@ -3,7 +3,7 @@ This is an example of a simple browser client that authenticates Curb users and 
 ### How to run
 This example app is designed to be run just in a browser, no back-end support necessary.  Here's all you need to run it.
 
-* Start a static server in this directory running on port `8000`.  You can run `npm start` (after an `npm install`) to start the server.
+* Start a static server in this directory running on port `8000`.  You can run `npm run preview` (after an `npm install`) to start the server.
 * Navigate to `http://localhost:8000`.
 
 ### About this app
