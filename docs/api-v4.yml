@@ -854,6 +854,15 @@ paths:
               summary: 2-week intervals
               value: "2w"
         - in: query
+          name: describe_intervals
+          schema:
+            type: boolean
+            default: true
+          description: "
+            When set to true, this will include an array of the interval bands used for this request.  
+            \n\n
+            This parameter is only applicable when `interval_size` is used.  See more details on the HistoricalTimeSeriesResponse schema"              
+        - in: query
           name: from_now_range
           schema:
             type: string
@@ -1609,6 +1618,293 @@ paths:
                             - -1375
                           - - 1639937400
                             - -1588
+                interval_size=1d:
+                  value:
+                    count: 4
+                    real_samples_count: 90
+                    synthetic_samples_count: 0
+                    start: 1659934800
+                    end: 1660258799
+                    previous:
+                    next:
+                    resolution: h
+                    resolution_seconds: 3600
+                    hubs:
+                    - crhs5ma2
+                    units:
+                    - key: w
+                      name: real power
+                      unit: W
+                    registers:
+                    - id: 834a9909-f367-4987-9601-725d705d6dd8
+                      label: Main A Phase
+                      group: 0
+                      channel: 0
+                      grid: true
+                      production: false
+                      battery: false
+                      circuit_type: main
+                    - id: 3ab156f8-d5b2-4587-963b-dd21cb9a1da5
+                      label: Solar A Phase
+                      group: 0
+                      channel: 1
+                      grid: false
+                      production: true
+                      battery: false
+                      circuit_type: breaker_side_production
+                    - id: a7d66f16-79d0-46aa-b4f9-33095dfc1586
+                      label:
+                      group: 0
+                      channel: 2
+                      grid: false
+                      production: false
+                      battery: false
+                      circuit_type: consumption
+                    - id: 36787ec9-dbbd-49cc-ae78-dbbf0f5308e4
+                      label: HVAC compressor
+                      group: 0
+                      channel: 3
+                      grid: false
+                      production: false
+                      battery: false
+                      circuit_type: consumption
+                    - id: e4f10942-47bb-4894-84c5-04666fc8cab7
+                      label:
+                      group: 0
+                      channel: 4
+                      grid: false
+                      production: false
+                      battery: false
+                      circuit_type: consumption
+                    - id: 939f08bd-f3c7-4e7f-a8b2-f63d8c3ecaed
+                      label:
+                      group: 0
+                      channel: 5
+                      grid: false
+                      production: false
+                      battery: false
+                      circuit_type: consumption
+                    - id: 80fed2bc-840f-4395-8dca-585523884953
+                      label: Main B Phase
+                      group: 1
+                      channel: 0
+                      grid: true
+                      production: false
+                      battery: false
+                      circuit_type: main
+                    - id: b4260e18-66a5-4cf8-bece-5b50e23ef4b3
+                      label: Solar B Phase
+                      group: 1
+                      channel: 1
+                      grid: false
+                      production: true
+                      battery: false
+                      circuit_type: breaker_side_production
+                    - id: cb104ac5-3ddd-4b14-8153-3e8475bc7672
+                      label:
+                      group: 1
+                      channel: 2
+                      grid: false
+                      production: false
+                      battery: false
+                      circuit_type: consumption
+                    - id: ec2158d7-8085-4aac-96c9-a939b5c5c8ca
+                      label:
+                      group: 1
+                      channel: 3
+                      grid: false
+                      production: false
+                      battery: false
+                      circuit_type: consumption
+                    - id: 45ab969e-0457-4e06-8bd5-df8ad8a634d9
+                      label:
+                      group: 1
+                      channel: 4
+                      grid: false
+                      production: false
+                      battery: false
+                      circuit_type: consumption
+                    - id: 49e1624a-ce44-4fa8-8ce7-26ea6b57a6eb
+                      label:
+                      group: 1
+                      channel: 5
+                      grid: false
+                      production: false
+                      battery: false
+                      circuit_type: consumption
+                    - id: ea626128-24b5-458a-b3ab-348eb2024c86
+                      label:
+                      group: 2
+                      channel: 0
+                      grid: false
+                      production: false
+                      battery: false
+                      circuit_type: consumption
+                    - id: 7cfe8a54-cfdf-43f0-93b2-6bb6f4b55254
+                      label:
+                      group: 2
+                      channel: 1
+                      grid: false
+                      production: false
+                      battery: false
+                      circuit_type: consumption
+                    - id: 03021d86-0dc3-4b5d-a3dc-537949127b3c
+                      label:
+                      group: 2
+                      channel: 2
+                      grid: false
+                      production: false
+                      battery: false
+                      circuit_type: consumption
+                    - id: 29f0239f-c53a-4ebe-8641-861c13ed15b1
+                      label:
+                      group: 3
+                      channel: 0
+                      grid: false
+                      production: false
+                      battery: false
+                      circuit_type: consumption
+                    - id: 75659e6f-2767-4bfe-ba94-3e0f2d58ec0b
+                      label:
+                      group: 3
+                      channel: 1
+                      grid: false
+                      production: false
+                      battery: false
+                      circuit_type: consumption
+                    - id: dbd87692-f0d4-48be-8086-e8fe11ca79a6
+                      label:
+                      group: 3
+                      channel: 2
+                      grid: false
+                      production: false
+                      battery: false
+                      circuit_type: consumption
+                    - id: __OTHER__
+                      label: Other
+                      grid: false
+                      production: false
+                      battery: false
+                      other: true
+                      circuit_type: other
+                    results:
+                    - t: 1659934800
+                      r:
+                        w:
+                        - 251.25
+                        - -270.125
+                        - 0
+                        - 651.833
+                        - 0
+                        - 0
+                        - 247.708
+                        - -273.375
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 390.625
+                      tot:
+                        net:
+                          w: 498.958
+                        cons:
+                          w: 1042.46
+                        prod:
+                          w: -543.5
+                    - t: 1660021200
+                      r:
+                        w:
+                        - 242.75
+                        - -330.917
+                        - 0
+                        - 709.792
+                        - 0
+                        - 0
+                        - 230.417
+                        - -334.917
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 429.208
+                      tot:
+                        net:
+                          w: 473.167
+                        cons:
+                          w: 1139
+                        prod:
+                          w: -665.833
+                    - t: 1660107600
+                      r:
+                        w:
+                        - 261.792
+                        - -312.917
+                        - 0
+                        - 732.917
+                        - 0
+                        - 0
+                        - 250.708
+                        - -316.375
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 408.875
+                      tot:
+                        net:
+                          w: 512.5
+                        cons:
+                          w: 1141.79
+                        prod:
+                          w: -629.292
+                    - t: 1660194000
+                      r:
+                        w:
+                        - 115.875
+                        - -280.958
+                        - 0
+                        - 504.958
+                        - 0
+                        - 0
+                        - 105.875
+                        - -283.667
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 0
+                        - 281.417
+                      tot:
+                        net:
+                          w: 221.75
+                        cons:
+                          w: 786.375
+                        prod:
+                          w: -564.625
+
         '400':
           description: Bad request
         '404':
@@ -3287,6 +3583,29 @@ components:
         - name
         - unit
 
+    IntervalBandDefinition:
+      type: object
+      properties:
+        range:
+          type: array
+          minLength: 2
+          maxLength: 2
+          items:
+            type: integer
+            format: Unix timestamp
+          description: The first item represents the start of the interval, and the second item represents the end of the interval
+        seconds:
+          type: integer
+        sample_count:
+          type: integer
+        incomplete:
+          type: boolean
+          description: This is true only when the end of this interval is in the future
+      required:
+        - range
+        - seconds
+        - sample_count
+
     HistoricalTimeSeriesResponse:
       type: object
       properties:
@@ -3314,6 +3633,12 @@ components:
           description: Absolute URL of next page of results.  If no next page exists, this will be null
         interval_seconds:
           type: integer
+          nullable: true
+        interval_bands:
+          type: array
+          items:
+            type: object
+            $ref: "#/components/schemas/IntervalBandDefinition"
         resolution: 
           type: string
           enum: [m, 5m, h, d]
@@ -3337,6 +3662,17 @@ components:
           items:
             type: object
             $ref: "#/components/schemas/HistoricalTimeSeriesResultsByTimestamp"
+      required:
+        - count
+        - real_samples_count
+        - synthetic_samples_count
+        - start
+        - end
+        - previous
+        - next
+        - resolution
+        - hubs
+        - results
 
     HistoricalTimeSeriesResultsByTimestamp:
       type: array
