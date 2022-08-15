@@ -940,7 +940,7 @@ paths:
             type: boolean
             default: false
           allowEmptyValue: true
-          description: When true, this parameter tells the API to include totals in the response.  These totals include `net` (net grid impact) and `cons` (consuption), and possibly `prod` (production) and `batt` (battery) if those services are enabled at the location.
+          description: When true, this parameter tells the API to include totals in the response.  These totals include `net` (net grid impact) and `cons` (consumption), and possibly `prod` (production) and `batt` (battery) if those services are enabled at the location.
         - in: query
           name: include_cost
           schema:
@@ -1954,7 +1954,7 @@ paths:
             type: boolean
             default: false
           allowEmptyValue: true
-          description: When true, this parameter tells the API to include totals in the response.  These totals include `net` (net grid impact) and `cons` (consuption), and possibly `prod` (production) and `batt` (battery) if those services are enabled at the location.
+          description: When true, this parameter tells the API to include totals in the response.  These totals include `net` (net grid impact) and `cons` (consumption), and possibly `prod` (production) and `batt` (battery) if those services are enabled at the location.
         - in: query
           name: group_by
           schema:
@@ -2280,7 +2280,7 @@ paths:
             type: boolean
             default: false
           allowEmptyValue: true
-          description: When true, this parameter tells the API to include totals in the response.  These totals include `grid_net`, `consuption`, `production`, `battery`.  By default, this value will be false and only the individual registers will be returned.
+          description: When true, this parameter tells the API to include totals in the response.  These totals include `grid_net`, `consumption`, `production`, `battery`.  By default, this value will be false and only the individual registers will be returned.
         - in: query
           name: group_by
           schema:
@@ -2791,7 +2791,7 @@ paths:
   #           type: boolean
   #           default: false
   #         allowEmptyValue: true
-  #         description: When true, this parameter tells the API to include totals in the response.  These totals include `grid_net`, `consuption`, `production`, `battery`.  By default, this value will be false and only the individual registers will be returned.
+  #         description: When true, this parameter tells the API to include totals in the response.  These totals include `grid_net`, `consumption`, `production`, `battery`.  By default, this value will be false and only the individual registers will be returned.
   #       - in: query
   #         name: group_by
   #         schema:
