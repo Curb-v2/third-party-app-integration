@@ -763,7 +763,83 @@ paths:
                     production: false
                     battery: false
                     circuit_number: 7
-  
+
+  /locations/{location_id}/data-channels:
+    get:
+      summary: List all data channels for a given location
+      description: This endpoint describes all data channels for a given location.  A data channel can be a single register (which maps to a single CT sensor), a category (eg. HVAC), or a summation derived from multiple readings (eg. "Grid net", "Total production", "Unmeasured consumption", etc).
+      operationId: listDataChannelsForLocation
+      parameters:
+        - in: path
+          name: location_id
+          schema:
+            type: string
+            format: uuid
+          required: true      
+      tags:
+        - Configuration
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DataChannel"
+              example:
+                - 
+                  id: r0
+                  metrics:
+                    - w
+                    - i
+                    - s
+                    - q
+                  type: register
+                  name: Kitchen Out
+                  ref:
+                    id: ee67b067-2a22-4712-ad3a-56a71c40a736
+                    dt_created: '2018-04-25T19:19:35.013548Z'
+                    dt_modified: '2019-07-19T23:28:44.350430Z'
+                    organization: curb
+                    label: Kitchen Out
+                    number: 13
+                    circuit_type: consumption
+                    multiplier: 1
+                    inverted: false
+                    installation: crhs5ma2
+                    clamp_definition: XIAMEN30
+                    group: 2
+                    channel: 1
+                    grid: false
+                    production: false
+                    battery: false
+                    circuit_number: 6
+                - 
+                  id: c0
+                  metrics:
+                    - w
+                    - i
+                    - s
+                    - q
+                  type: category
+                  name: HVAC
+                  ref:
+                    id: CoolingAndHeating
+                    name: HVAC
+                - 
+                  id: s0
+                  metrics:
+                    - w
+                    - i
+                    - s
+                    - q
+                  type: summation
+                  name: Grid net
+                  ref:
+                    id: grid-net
+                    name: Grid net                    
+                    
   /locations/{location_id}/billing:
     get:
       summary: Get billing info for a location
@@ -3775,6 +3851,60 @@ components:
         resolution:
           type: string
           enum: [m, 5m, h, d]
+          
+    CategoryReference:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          
+    SummationReference:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          enum: [
+            grid-net,
+            total-consumption,
+            total-production,
+            total-battery,
+            unmeasured-consumption
+          ]
+          
+    DataChannel:
+      type: object
+      required:
+        - id
+        - metrics
+        - type
+        - name
+        - ref
+      properties:
+        id:
+          type: string
+          description: This is the id that is sent to the historical or live data service to request data on this channel. It starts with "r" for register channels, "c" for category channels, or "s" for summation channels
+          
+        metrics:
+          type: array
+          description: An array of supported metrics this channel supports.  
+          items:
+            type: string
+            enum: [w, s, i, q, pf, v, th, tg, ts]
+        type:
+          type: string
+          enum: [register, category, summation]
+        name:
+          type: string
+        ref:
+          oneOf:
+            - 
+              $ref: '#/components/schemas/Register'
+            - $ref: '#/components/schemas/CategoryReference'
+            - $ref: '#/components/schemas/SummationReference'
 
     EnergyScore:
       type: object
