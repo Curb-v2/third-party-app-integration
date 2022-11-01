@@ -1,5 +1,3 @@
-# https://peterevans.dev/posts/how-to-host-swagger-docs-with-github-pages/
-
 openapi: "3.0.0"
 info:
   version: 4.0.0
@@ -764,12 +762,12 @@ paths:
                     battery: false
                     circuit_number: 7
 
-  /locations/{location_id}/data-channels:
+  /locations/{location_id}/query-channels:
     get:
-      summary: List all data channels for a given location
+      summary: List all query channels for a given location
       description: | 
-        This endpoint describes all queryable data channels for a given location.  A data channel can be a single register (which maps to a single CT sensor), a category (eg. HVAC), or a summation derived from multiple readings (eg. "Grid net", "Total production", "Unmeasured consumption", etc).  Here are the definitions of the `metrics` values for each data channel.  The availability of these metrics on the type of channel and the type of CT sensor associated with the register.
-        * `w` - Real power. Watts (W)
+        This endpoint describes all queryable data channels for a given location.  A query channel can be a single register (which maps to a single CT sensor), a category (eg. HVAC), or a summation derived from multiple readings (eg. "Grid net", "Total production", "Unmeasured consumption", etc).  Here are the definitions of the `metrics` values for each query channel.  The availability of these metrics depends on the type of CT sensors of its associated registers.
+        * `p` - Real power. Watts (W)
         * `e` - Total energy. Watt-hours (Wh)
         * `i` - RMS current. Amperes (A)
         * `s` - Apparent power. Volt-amperes (VA)
@@ -780,7 +778,7 @@ paths:
         * `th` - Standard total harmonic distortion. Percent (%). __Only available on high-accuracy sensors.__
         * `tg` - Group total harmonic distortion. Percent (%). __Only available on high-accuracy sensors.__
         * `ts` - Sub group total harmonic distortion. Percent (%). __Only available on high-accuracy sensors.__
-      operationId: listDataChannelsForLocation
+      operationId: listQueryChannelsForLocation
       parameters:
         - in: path
           name: location_id
@@ -798,7 +796,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/DataChannel"
+                  $ref: "#/components/schemas/QueryChannel"
               example:
                 - 
                   id: r0
@@ -3887,7 +3885,7 @@ components:
             unmeasured-consumption
           ]
           
-    DataChannel:
+    QueryChannel:
       type: object
       required:
         - id
