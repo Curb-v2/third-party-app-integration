@@ -767,7 +767,19 @@ paths:
   /locations/{location_id}/data-channels:
     get:
       summary: List all data channels for a given location
-      description: This endpoint describes all data channels for a given location.  A data channel can be a single register (which maps to a single CT sensor), a category (eg. HVAC), or a summation derived from multiple readings (eg. "Grid net", "Total production", "Unmeasured consumption", etc).
+      description: | 
+        This endpoint describes all queryable data channels for a given location.  A data channel can be a single register (which maps to a single CT sensor), a category (eg. HVAC), or a summation derived from multiple readings (eg. "Grid net", "Total production", "Unmeasured consumption", etc).  Here are the definitions of the `metrics` values for each data channel.  The availability of these metrics on the type of channel and the type of CT sensor associated with the register.
+        * `w` - Real power. Watts (W)
+        * `e` - Total energy. Watt-hours (Wh)
+        * `i` - RMS current. Amperes (A)
+        * `s` - Apparent power. Volt-amperes (VA)
+        * `q` - Reactive power. Volt-amperes (var)
+        * `v` - RMS Voltage. Volts (V).  __Only available on high-accuracy sensors.__
+        * `f` - Frequency. Hertz (Hz).  __Only available on high-accuracy sensors.__
+        * `pf` - Power factor. Unitless. __Only available on high-accuracy sensors.__
+        * `th` - Standard total harmonic distortion. Percent (%). __Only available on high-accuracy sensors.__
+        * `tg` - Group total harmonic distortion. Percent (%). __Only available on high-accuracy sensors.__
+        * `ts` - Sub group total harmonic distortion. Percent (%). __Only available on high-accuracy sensors.__
       operationId: listDataChannelsForLocation
       parameters:
         - in: path
@@ -3658,7 +3670,7 @@ components:
         - key
         - name
         - unit
-
+        
     IntervalBandDefinition:
       type: object
       properties:
@@ -3893,7 +3905,7 @@ components:
           description: An array of supported metrics this channel supports.  
           items:
             type: string
-            enum: [w, s, i, q, pf, v, th, tg, ts]
+            enum: [w, e, i, s, q, v, f, pf, th, tg, ts]
         type:
           type: string
           enum: [register, category, summation]
