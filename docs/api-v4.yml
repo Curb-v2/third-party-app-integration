@@ -766,7 +766,7 @@ paths:
     get:
       summary: List all query channels for a given location
       description: | 
-        This endpoint describes all queryable data channels for a given location.  A query channel can be a single register (which maps to a single CT sensor), a category (eg. HVAC), or a summation derived from multiple readings (eg. "Grid net", "Total production", "Unmeasured consumption", etc).  Here are the definitions of the `metrics` values for each query channel.  The availability of these metrics depends on the type of CT sensors of its associated registers.
+        This endpoint describes all queryable data channels for a given location.  A query channel can be a single register (which maps to a single CT sensor), a category (eg. HVAC), a phase, or a summation derived from multiple readings (eg. "Grid net", "Total production", "Unmeasured consumption", etc).  Here are the definitions of the `metrics` values for each query channel.  The availability of these metrics depends on the type of CT sensors of its associated registers.
         * `p` - Real power. Watts (W)
         * `e` - Total energy. Watt-hours (Wh)
         * `i` - RMS current. Amperes (A)
@@ -801,7 +801,7 @@ paths:
                 - 
                   id: r0
                   metrics:
-                    - w
+                    - p
                     - i
                     - s
                     - q
@@ -828,7 +828,7 @@ paths:
                 - 
                   id: c0
                   metrics:
-                    - w
+                    - p
                     - i
                     - s
                     - q
@@ -840,7 +840,7 @@ paths:
                 - 
                   id: s0
                   metrics:
-                    - w
+                    - p
                     - i
                     - s
                     - q
